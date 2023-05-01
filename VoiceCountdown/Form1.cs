@@ -43,7 +43,11 @@ namespace VoiceCountdown
             "timer_1punmae_01.wav",
             "30byoumae.wav",
             "10byoumae.wav",
-            "3,2,1.wav"
+            "num005_01.wav",
+            "num004_01.wav",
+            "num003_01.wav",
+            "num002_01.wav",
+            "num001_01.wav",
         };
         /// <summary>
         /// 音声の時間をTimeSpanで用意する
@@ -58,7 +62,11 @@ namespace VoiceCountdown
             new TimeSpan(0, 1, 0),
             new TimeSpan(0, 0, 30),
             new TimeSpan(0, 0, 10),
-            new TimeSpan(0, 0, 3)
+            new TimeSpan(0, 0, 5),
+            new TimeSpan(0, 0, 4),
+            new TimeSpan(0, 0, 3),
+            new TimeSpan(0, 0, 2),
+            new TimeSpan(0, 0, 1),
         };
         /// <summary>
         /// Stopwatchオブジェクトを作成する
@@ -135,9 +143,9 @@ namespace VoiceCountdown
                     else { break; }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                MessageBox.Show("Unplayable File");
+                MessageBox.Show(ex.Message, "Unplayable File");
             }
         }
 
@@ -226,7 +234,7 @@ namespace VoiceCountdown
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void AboutToolStripMenuItem_Click(object sender, EventArgs e) =>
-            MessageBox.Show("VoiceCountdown\r\n\r\nVersion 20230428\r\nあみたろの声素材工房(https://amitaro.net/)の音声を使用しました");
+            MessageBox.Show("VoiceCountdown\r\n\r\nVersion 20230501\r\nあみたろの声素材工房(https://amitaro.net/)の音声を使用しました");
 
         /// <summary>
         /// 終了イベントハンドラ

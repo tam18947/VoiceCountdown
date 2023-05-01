@@ -98,7 +98,7 @@
             checkedListBox1.CheckOnClick = true;
             checkedListBox1.Dock = DockStyle.Fill;
             checkedListBox1.FormattingEnabled = true;
-            checkedListBox1.Items.AddRange(new object[] { "10分前", "5分前", "4分前", "3分前", "2分前", "1分前", "30秒前", "10秒前", "3, 2, 1" });
+            checkedListBox1.Items.AddRange(new object[] { "10分前", "5分前", "4分前", "3分前", "2分前", "1分前", "30秒前", "10秒前", "5", "4", "3", "2", "1" });
             checkedListBox1.Location = new Point(0, 15);
             checkedListBox1.Name = "checkedListBox1";
             checkedListBox1.Size = new Size(100, 294);
