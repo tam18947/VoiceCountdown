@@ -97,6 +97,10 @@ namespace VoiceCountdown
         /// 初期化が終了したかどうか
         /// </summary>
         private readonly bool initialized = false;
+        /// <summary>
+        /// ボタンのクリックカウント
+        /// </summary>
+        private int clickCount = 0;
 
         /// <summary>
         /// タイマーで時間が来たら音声を再生させるイベントハンドラ
@@ -231,7 +235,6 @@ namespace VoiceCountdown
                 (s.Width - Margin.Left - Margin.Right) / 2,
                 (s.Height - Margin.Top - Margin.Bottom) / 2);
         }
-
         /// <summary>
         /// タイマーの開始，停止を変更するイベントハンドラ
         /// </summary>
@@ -243,32 +246,67 @@ namespace VoiceCountdown
         /// </summary>
         private void Button_Click()
         {
-            if (timer1.Enabled)
+            clickCount++;
+            if (clickCount == 2)
             {
-                audioPlayer?.Stop();
+                clickCount = 0;
+                // ダブルクリックされたときの処理を記述
                 button1.BackgroundImage = Resources.Play;
+                // オーディオを停止する
+                audioPlayer?.Stop();
                 // タイマーを停止する
                 timer1.Stop();
-                // ストップウォッチを止める
-                sw.Stop();
+                // ストップウォッチをリセットする
                 sw.Reset();
                 label2.Text = "00:00";
                 dateTimePicker1.Enabled = true;
-                startToolStripMenuItem.Enabled = true;
-                stopToolStripMenuItem.Enabled = false;
             }
             else
             {
-                current = 0;
                 button1.BackgroundImage = Resources.Stop;
-                timeSpan = dateTimePicker1.Value - baseDate;
-                // タイマーを開始する
-                timer1.Start();
-                // ストップウォッチを開始する
-                sw.Start();
-                dateTimePicker1.Enabled = false;
-                startToolStripMenuItem.Enabled = false;
-                stopToolStripMenuItem.Enabled = true;
+                System.Windows.Forms.Timer t = new()
+                {
+                    Interval = SystemInformation.DoubleClickTime
+                };
+                t.Start();
+                t.Tick += (s, args) =>
+                {
+                    t.Stop();
+                    clickCount = 0;
+                    if (timer1.Enabled)
+                    {
+                        // タイマーが開始していたら一時停止ボタンにする
+                        button1.BackgroundImage = Resources.Pause;
+                    }
+                    else
+                    {
+                        // タイマーが停止していたら開始ボタンにする
+                        button1.BackgroundImage = Resources.Play;
+                    }
+                };
+                if (timer1.Enabled)
+                {
+                    // オーディオを停止する
+                    audioPlayer?.Stop();
+                    // タイマーを停止する
+                    timer1.Stop();
+                    // ストップウォッチを止める
+                    sw.Stop();
+                    startToolStripMenuItem.Enabled = true;
+                    stopToolStripMenuItem.Enabled = false;
+                }
+                else
+                {
+                    current = 0;
+                    timeSpan = dateTimePicker1.Value - baseDate;
+                    // タイマーを開始する
+                    timer1.Start();
+                    // ストップウォッチを開始する
+                    sw.Start();
+                    dateTimePicker1.Enabled = false;
+                    startToolStripMenuItem.Enabled = false;
+                    stopToolStripMenuItem.Enabled = true;
+                }
             }
         }
 
@@ -289,6 +327,20 @@ namespace VoiceCountdown
         {
             audioPlayer?.Stop();
             Close();
+        }
+
+        /// <summary>
+        /// フォントダイアログを表示するイベントハンドラ
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void FontToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (fontDialog1.ShowDialog() == DialogResult.OK)
+            {
+                label2.Font = new Font(fontDialog1.Font.FontFamily, label2.Font.Size);
+                ControlSizeChange(splitContainer1.Panel2, label2);
+            }
         }
     }
 }

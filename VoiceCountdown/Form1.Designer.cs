@@ -41,6 +41,8 @@
             startToolStripMenuItem = new ToolStripMenuItem();
             stopToolStripMenuItem = new ToolStripMenuItem();
             toolStripSeparator2 = new ToolStripSeparator();
+            fontToolStripMenuItem = new ToolStripMenuItem();
+            toolStripSeparator1 = new ToolStripSeparator();
             exitToolStripMenuItem = new ToolStripMenuItem();
             helpToolStripMenuItem = new ToolStripMenuItem();
             aboutToolStripMenuItem = new ToolStripMenuItem();
@@ -48,6 +50,7 @@
             toolStripDropDownButton1 = new ToolStripDropDownButton();
             toolStripStatusLabel1 = new ToolStripStatusLabel();
             timer1 = new System.Windows.Forms.Timer(components);
+            fontDialog1 = new FontDialog();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
@@ -72,7 +75,6 @@
             // 
             // splitContainer1.Panel2
             // 
-            splitContainer1.Panel2.BackColor = SystemColors.Control;
             splitContainer1.Panel2.Controls.Add(label2);
             splitContainer1.Panel2.SizeChanged += SplitContainer1_Panel2_SizeChanged;
             splitContainer1.Size = new Size(600, 389);
@@ -89,7 +91,7 @@
             checkedListBox1.Items.AddRange(new object[] { "10分前", "5分前", "4分前", "3分前", "2分前", "1分前", "30秒前", "10秒前", "5", "4", "3", "2", "1" });
             checkedListBox1.Location = new Point(0, 15);
             checkedListBox1.Name = "checkedListBox1";
-            checkedListBox1.Size = new Size(100, 276);
+            checkedListBox1.Size = new Size(100, 251);
             checkedListBox1.TabIndex = 1;
             // 
             // label1
@@ -106,7 +108,7 @@
             // 
             dateTimePicker1.Dock = DockStyle.Bottom;
             dateTimePicker1.Format = DateTimePickerFormat.Time;
-            dateTimePicker1.Location = new Point(0, 291);
+            dateTimePicker1.Location = new Point(0, 266);
             dateTimePicker1.Name = "dateTimePicker1";
             dateTimePicker1.ShowUpDown = true;
             dateTimePicker1.Size = new Size(100, 23);
@@ -115,14 +117,16 @@
             // 
             // button1
             // 
-            button1.BackColor = Color.Black;
+            button1.BackColor = Color.Transparent;
             button1.BackgroundImage = Properties.Resources.Play;
             button1.BackgroundImageLayout = ImageLayout.Zoom;
             button1.Dock = DockStyle.Bottom;
-            button1.Location = new Point(0, 314);
+            button1.FlatStyle = FlatStyle.Flat;
+            button1.ForeColor = SystemColors.Control;
+            button1.Location = new Point(0, 289);
             button1.Name = "button1";
-            button1.Size = new Size(100, 75);
-            button1.TabIndex = 4;
+            button1.Size = new Size(100, 100);
+            button1.TabIndex = 3;
             button1.UseVisualStyleBackColor = false;
             button1.Click += Button1_Click;
             // 
@@ -147,7 +151,7 @@
             // 
             // fileToolStripMenuItem
             // 
-            fileToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { startToolStripMenuItem, stopToolStripMenuItem, toolStripSeparator2, exitToolStripMenuItem });
+            fileToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { startToolStripMenuItem, stopToolStripMenuItem, toolStripSeparator2, fontToolStripMenuItem, toolStripSeparator1, exitToolStripMenuItem });
             fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             fileToolStripMenuItem.Size = new Size(67, 20);
             fileToolStripMenuItem.Text = "ファイル(&F)";
@@ -155,7 +159,7 @@
             // startToolStripMenuItem
             // 
             startToolStripMenuItem.Name = "startToolStripMenuItem";
-            startToolStripMenuItem.Size = new Size(113, 22);
+            startToolStripMenuItem.Size = new Size(121, 22);
             startToolStripMenuItem.Text = "開始(&S)";
             startToolStripMenuItem.Click += Button1_Click;
             // 
@@ -163,19 +167,31 @@
             // 
             stopToolStripMenuItem.Enabled = false;
             stopToolStripMenuItem.Name = "stopToolStripMenuItem";
-            stopToolStripMenuItem.Size = new Size(113, 22);
+            stopToolStripMenuItem.Size = new Size(121, 22);
             stopToolStripMenuItem.Text = "停止(&C)";
             stopToolStripMenuItem.Click += Button1_Click;
             // 
             // toolStripSeparator2
             // 
             toolStripSeparator2.Name = "toolStripSeparator2";
-            toolStripSeparator2.Size = new Size(110, 6);
+            toolStripSeparator2.Size = new Size(118, 6);
+            // 
+            // fontToolStripMenuItem
+            // 
+            fontToolStripMenuItem.Name = "fontToolStripMenuItem";
+            fontToolStripMenuItem.Size = new Size(121, 22);
+            fontToolStripMenuItem.Text = "フォント(&F)";
+            fontToolStripMenuItem.Click += FontToolStripMenuItem_Click;
+            // 
+            // toolStripSeparator1
+            // 
+            toolStripSeparator1.Name = "toolStripSeparator1";
+            toolStripSeparator1.Size = new Size(118, 6);
             // 
             // exitToolStripMenuItem
             // 
             exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            exitToolStripMenuItem.Size = new Size(113, 22);
+            exitToolStripMenuItem.Size = new Size(121, 22);
             exitToolStripMenuItem.Text = "終了(&X)";
             exitToolStripMenuItem.Click += ExitToolStripMenuItem_Click;
             // 
@@ -189,7 +205,7 @@
             // aboutToolStripMenuItem
             // 
             aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            aboutToolStripMenuItem.Size = new Size(180, 22);
+            aboutToolStripMenuItem.Size = new Size(158, 22);
             aboutToolStripMenuItem.Text = "バージョン情報(&A)";
             aboutToolStripMenuItem.Click += AboutToolStripMenuItem_Click;
             // 
@@ -213,12 +229,16 @@
             // toolStripStatusLabel1
             // 
             toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            toolStripStatusLabel1.Size = new Size(118, 17);
-            toolStripStatusLabel1.Text = "toolStripStatusLabel1";
+            toolStripStatusLabel1.Size = new Size(132, 17);
+            toolStripStatusLabel1.Text = "選択された出力デバイス名";
             // 
             // timer1
             // 
             timer1.Tick += Timer1_Tick;
+            // 
+            // fontDialog1
+            // 
+            fontDialog1.ShowEffects = false;
             // 
             // Form1
             // 
@@ -266,5 +286,8 @@
         private System.Windows.Forms.Timer timer1;
         private DateTimePicker dateTimePicker1;
         private Button button1;
+        private ToolStripMenuItem fontToolStripMenuItem;
+        private FontDialog fontDialog1;
+        private ToolStripSeparator toolStripSeparator1;
     }
 }
