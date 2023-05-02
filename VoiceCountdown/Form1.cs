@@ -27,7 +27,8 @@ namespace VoiceCountdown
                     item.Checked = true;
                 }
             }
-            TimeLabel_Resize();
+            initialized = true;
+            ControlSizeChange(splitContainer1.Panel2, label2);
         }
 
         /// <summary>
@@ -92,6 +93,10 @@ namespace VoiceCountdown
         /// 現在の timeSpans の配列番号
         /// </summary>
         private int current = 0;
+        /// <summary>
+        /// 初期化が終了したかどうか
+        /// </summary>
+        private readonly bool initialized = false;
 
         /// <summary>
         /// タイマーで時間が来たら音声を再生させるイベントハンドラ
@@ -175,17 +180,56 @@ namespace VoiceCountdown
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void SplitContainer2_Panel1_SizeChanged(object sender, EventArgs e) => TimeLabel_Resize();
+        private void SplitContainer1_Panel2_SizeChanged(object sender, EventArgs e) => ControlSizeChange((SplitterPanel)sender, label2);
         /// <summary>
-        /// サイズ変更で時間表示の文字サイズを変更する実処理
+        /// labelのコントロールサイズを基にしてフォントサイズを自動調節する
         /// </summary>
-        private void TimeLabel_Resize()
+        /// <param name="controlP">親コントロール</param>
+        /// <param name="controlC">子コントロール</param>
+        private void ControlSizeChange(Control controlP, Control controlC)
         {
-            Font labelFont = label2.Font;
-            Size labelSize = label2.Size;
-            int fontSize = (int)(Math.Min(labelSize.Width, labelSize.Height) * 0.55);
-            labelFont = new Font(labelFont.FontFamily, fontSize);
-            label2.Font = labelFont;
+            // コントロールが初期化済みなら
+            if (!initialized) { return; }
+            int val = 0;
+            Point p = GetControlLocation(controlP, controlC);
+            while (controlC.Font.Size - 1 > 0 && (p.X != 0 || p.Y != 0))
+            {
+                if (p.X < 0 || p.Y < 0)
+                {
+                    // 文字を小さくする
+                    p = ResizeFont(controlP, controlC, -1f);
+                    if (val == 1)
+                    {
+                        break;
+                    }
+                    val = -1;
+                }
+                else
+                {
+                    // 文字を大きくする
+                    p = ResizeFont(controlP, controlC, 1f);
+                    if (val == -1)
+                    {
+                        // 文字を小さくする
+                        p = ResizeFont(controlP, controlC, -1f);
+                        break;
+                    }
+                    val = 1;
+                }
+            }
+            controlC.Location = p + new Size(Margin.Left, Margin.Top);
+        }
+        private Point ResizeFont(Control controlP, Control controlC, float emSize)
+        {
+            controlC.Font = new Font(controlC.Font.FontFamily, (float)(controlC.Font.Size + emSize), controlC.Font.Style);
+            return GetControlLocation(controlP, controlC);
+        }
+        private Point GetControlLocation(Control controlP, Control controlC)
+        {
+            Size s = controlP.ClientSize - controlC.ClientSize;
+            return new Point(
+                (s.Width - Margin.Left - Margin.Right) / 2,
+                (s.Height - Margin.Top - Margin.Bottom) / 2);
         }
 
         /// <summary>
@@ -234,7 +278,7 @@ namespace VoiceCountdown
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void AboutToolStripMenuItem_Click(object sender, EventArgs e) =>
-            MessageBox.Show("VoiceCountdown\r\n\r\nVersion 20230501\r\nあみたろの声素材工房(https://amitaro.net/)の音声を使用しました");
+            MessageBox.Show("VoiceCountdown\r\n\r\nVersion 20230502\r\nあみたろの声素材工房(https://amitaro.net/)の音声を使用しました");
 
         /// <summary>
         /// 終了イベントハンドラ
