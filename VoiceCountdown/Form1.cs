@@ -101,6 +101,8 @@ namespace VoiceCountdown
         /// ボタンのクリックカウント
         /// </summary>
         private int clickCount = 0;
+        private int clickInterval = 0;
+        private bool isFirstClick = true;
 
         /// <summary>
         /// タイマーで時間が来たら音声を再生させるイベントハンドラ
@@ -246,24 +248,14 @@ namespace VoiceCountdown
         /// </summary>
         private void Button_Click()
         {
+            // クリック数カウント
             clickCount++;
-            if (clickCount == 2)
+            // ダブルクリックだったらトリプルクリックの計測開始
+            if (isFirstClick)
             {
-                clickCount = 0;
-                // ダブルクリックされたときの処理を記述
-                button1.BackgroundImage = Resources.Play;
-                // オーディオを停止する
-                audioPlayer?.Stop();
-                // タイマーを停止する
-                timer1.Stop();
-                // ストップウォッチをリセットする
-                sw.Reset();
-                label2.Text = "00:00";
-                dateTimePicker1.Enabled = true;
-            }
-            else
-            {
-                button1.BackgroundImage = Resources.Stop;
+                isFirstClick = false;
+                clickInterval = 0;
+                timer2.Start();
                 System.Windows.Forms.Timer t = new()
                 {
                     Interval = SystemInformation.DoubleClickTime
@@ -271,41 +263,65 @@ namespace VoiceCountdown
                 t.Start();
                 t.Tick += (s, args) =>
                 {
+                    if (clickCount == 1)
+                    {
+                        timer2.Stop();
+                        isFirstClick = true;
+                    }
                     t.Stop();
                     clickCount = 0;
-                    if (timer1.Enabled)
-                    {
-                        // タイマーが開始していたら一時停止ボタンにする
-                        button1.BackgroundImage = Resources.Pause;
-                    }
-                    else
-                    {
-                        // タイマーが停止していたら開始ボタンにする
-                        button1.BackgroundImage = Resources.Play;
-                    }
                 };
-                if (timer1.Enabled)
+            }
+            // ダブルクリック間隔の時間を超えるまで処理
+            if (clickInterval < SystemInformation.DoubleClickTime)
+            {
+                if (clickCount == 3)
                 {
+                    clickCount = 0;
+                    // トリプルクリックされたときの処理を記述
+                    button1.BackgroundImage = Resources.Play;
                     // オーディオを停止する
                     audioPlayer?.Stop();
                     // タイマーを停止する
                     timer1.Stop();
-                    // ストップウォッチを止める
-                    sw.Stop();
-                    startToolStripMenuItem.Enabled = true;
+                    // ストップウォッチをリセットする
+                    sw.Reset();
+                    label2.Text = "00:00";
+                    dateTimePicker1.Enabled = true;
                     stopToolStripMenuItem.Enabled = false;
+                    startToolStripMenuItem.Text = "開始";
                 }
                 else
                 {
-                    current = 0;
-                    timeSpan = dateTimePicker1.Value - baseDate;
-                    // タイマーを開始する
-                    timer1.Start();
-                    // ストップウォッチを開始する
-                    sw.Start();
-                    dateTimePicker1.Enabled = false;
-                    startToolStripMenuItem.Enabled = false;
-                    stopToolStripMenuItem.Enabled = true;
+                    if (timer1.Enabled)
+                    {
+                        // オーディオを停止する
+                        audioPlayer?.Stop();
+                        // タイマーを停止する
+                        timer1.Stop();
+                        // ストップウォッチを止める
+                        sw.Stop();
+                        button1.BackgroundImage = Resources.Play;
+                        startToolStripMenuItem.Enabled = true;
+                        startToolStripMenuItem.Text = "再開";
+                    }
+                    else
+                    {
+                        current = 0;
+                        timeSpan = dateTimePicker1.Value - baseDate;
+                        // タイマーを開始する
+                        timer1.Start();
+                        // ストップウォッチを開始する
+                        sw.Start();
+                        button1.BackgroundImage = Resources.Pause;
+                        dateTimePicker1.Enabled = false;
+                        stopToolStripMenuItem.Enabled = true;
+                        startToolStripMenuItem.Text = "一時停止";
+                    }
+                    if (clickCount == 2)
+                    {
+                        button1.BackgroundImage = Resources.Stop;
+                    }
                 }
             }
         }
@@ -341,6 +357,36 @@ namespace VoiceCountdown
                 label2.Font = new Font(fontDialog1.Font.FontFamily, label2.Font.Size);
                 ControlSizeChange(splitContainer1.Panel2, label2);
             }
+        }
+
+        private void Timer2_Tick(object sender, EventArgs e)
+        {
+            // 時間計測
+            clickInterval += timer2.Interval;
+            // ダブルクリック間隔の時間を超えたらリセット
+            if (SystemInformation.DoubleClickTime < clickInterval)
+            {
+                timer2.Stop();
+                clickInterval = 0;
+                isFirstClick = true;
+                clickCount = 0;
+                if (timer1.Enabled)
+                {
+                    // タイマーが開始していたら一時停止ボタンにする
+                    button1.BackgroundImage = Resources.Pause;
+                }
+                else
+                {
+                    // タイマーが停止していたら開始ボタンにする
+                    button1.BackgroundImage = Resources.Play;
+                }
+            }
+        }
+
+        private void StopToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            clickCount = 2;
+            Button_Click();
         }
     }
 }

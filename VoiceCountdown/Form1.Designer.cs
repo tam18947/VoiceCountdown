@@ -51,6 +51,7 @@
             toolStripStatusLabel1 = new ToolStripStatusLabel();
             timer1 = new System.Windows.Forms.Timer(components);
             fontDialog1 = new FontDialog();
+            timer2 = new System.Windows.Forms.Timer(components);
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
@@ -159,7 +160,7 @@
             // startToolStripMenuItem
             // 
             startToolStripMenuItem.Name = "startToolStripMenuItem";
-            startToolStripMenuItem.Size = new Size(121, 22);
+            startToolStripMenuItem.Size = new Size(130, 22);
             startToolStripMenuItem.Text = "開始(&S)";
             startToolStripMenuItem.Click += Button1_Click;
             // 
@@ -167,31 +168,31 @@
             // 
             stopToolStripMenuItem.Enabled = false;
             stopToolStripMenuItem.Name = "stopToolStripMenuItem";
-            stopToolStripMenuItem.Size = new Size(121, 22);
-            stopToolStripMenuItem.Text = "停止(&C)";
-            stopToolStripMenuItem.Click += Button1_Click;
+            stopToolStripMenuItem.Size = new Size(130, 22);
+            stopToolStripMenuItem.Text = "リセット(&R)";
+            stopToolStripMenuItem.Click += StopToolStripMenuItem_Click;
             // 
             // toolStripSeparator2
             // 
             toolStripSeparator2.Name = "toolStripSeparator2";
-            toolStripSeparator2.Size = new Size(118, 6);
+            toolStripSeparator2.Size = new Size(127, 6);
             // 
             // fontToolStripMenuItem
             // 
             fontToolStripMenuItem.Name = "fontToolStripMenuItem";
-            fontToolStripMenuItem.Size = new Size(121, 22);
-            fontToolStripMenuItem.Text = "フォント(&F)";
+            fontToolStripMenuItem.Size = new Size(130, 22);
+            fontToolStripMenuItem.Text = "フォント(&F)...";
             fontToolStripMenuItem.Click += FontToolStripMenuItem_Click;
             // 
             // toolStripSeparator1
             // 
             toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new Size(118, 6);
+            toolStripSeparator1.Size = new Size(127, 6);
             // 
             // exitToolStripMenuItem
             // 
             exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            exitToolStripMenuItem.Size = new Size(121, 22);
+            exitToolStripMenuItem.Size = new Size(130, 22);
             exitToolStripMenuItem.Text = "終了(&X)";
             exitToolStripMenuItem.Click += ExitToolStripMenuItem_Click;
             // 
@@ -239,6 +240,10 @@
             // fontDialog1
             // 
             fontDialog1.ShowEffects = false;
+            // 
+            // timer2
+            // 
+            timer2.Tick += Timer2_Tick;
             // 
             // Form1
             // 
@@ -289,5 +294,6 @@
         private ToolStripMenuItem fontToolStripMenuItem;
         private FontDialog fontDialog1;
         private ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.Timer timer2;
     }
 }
