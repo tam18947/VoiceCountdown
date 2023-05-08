@@ -101,8 +101,10 @@ namespace VoiceCountdown
         /// ボタンのクリックカウント
         /// </summary>
         private int clickCount = 0;
+        /// <summary>
+        /// ボタンがダブルクリックされてからトリプルクリックされるまでの計測時間
+        /// </summary>
         private int clickInterval = 0;
-        private bool isFirstClick = true;
 
         /// <summary>
         /// タイマーで時間が来たら音声を再生させるイベントハンドラ
@@ -119,7 +121,7 @@ namespace VoiceCountdown
                 var ts = timeSpan - new TimeSpan(h, m, s);
                 if (ts.TotalSeconds <= 0)
                 {
-                    Reset_Click(new object(), new EventArgs());
+                    Reset_Click();
                 }
                 label2.Text = ts.ToString(@"mm\:ss");
                 for (int j = current; j < checkedListBox1.Items.Count; j++)
@@ -236,8 +238,9 @@ namespace VoiceCountdown
                 (s.Width - Margin.Left - Margin.Right) / 2,
                 (s.Height - Margin.Top - Margin.Bottom) / 2);
         }
+
         /// <summary>
-        /// タイマーの開始，停止を変更するイベントハンドラ
+        /// カウントダウンを開始するイベントハンドラ
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -253,7 +256,20 @@ namespace VoiceCountdown
             }
         }
 
+        /// <summary>
+        /// カウントダウンをリセットするイベントハンドラ
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Reset_Click(object sender, EventArgs e)
+        {
+            Reset_Click();
+        }
+
+        /// <summary>
+        /// カウントダウンをリセットする実処理
+        /// </summary>
+        private void Reset_Click()
         {
             if (selectToolStripMenuItem.Checked)
             {
@@ -265,17 +281,15 @@ namespace VoiceCountdown
                 ButtonWithoutPause_Click();
             }
         }
-
         /// <summary>
-        /// タイマーの開始，停止を変更する実処理
+        /// タイマーの開始，リセットを変更する実処理（一時停止機能あり）
         /// </summary>
         private void ButtonWithPause_Click()
         {
             // クリック数カウント
             clickCount++;
-            if (isFirstClick)
+            if (clickCount == 1)
             {
-                isFirstClick = false;
                 clickInterval = 0;
                 System.Windows.Forms.Timer t = new()
                 {
@@ -286,10 +300,6 @@ namespace VoiceCountdown
                 {
                     if (clickCount != 2)
                     {
-                        if (clickCount == 1)
-                        {
-                            isFirstClick = true;
-                        }
                         clickCount = 0;
                     }
                     t.Stop();
@@ -312,7 +322,6 @@ namespace VoiceCountdown
                     {
                         t.Stop();
                         clickInterval = 0;
-                        isFirstClick = true;
                         clickCount = 0;
                         if (timer1.Enabled)
                         {
@@ -382,6 +391,9 @@ namespace VoiceCountdown
                 }
             }
         }
+        /// <summary>
+        /// タイマーの開始，リセットを変更する実処理（一時停止機能なし）
+        /// </summary>
         private void ButtonWithoutPause_Click()
         {
             if (timer1.Enabled)
