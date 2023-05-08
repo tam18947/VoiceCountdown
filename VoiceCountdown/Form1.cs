@@ -27,7 +27,8 @@ namespace VoiceCountdown
                     item.Checked = true;
                 }
             }
-            TimeLabel_Resize();
+            initialized = true;
+            ControlSizeChange(splitContainer1.Panel2, label2);
         }
 
         /// <summary>
@@ -92,6 +93,18 @@ namespace VoiceCountdown
         /// 現在の timeSpans の配列番号
         /// </summary>
         private int current = 0;
+        /// <summary>
+        /// 初期化が終了したかどうか
+        /// </summary>
+        private readonly bool initialized = false;
+        /// <summary>
+        /// ボタンのクリックカウント
+        /// </summary>
+        private int clickCount = 0;
+        /// <summary>
+        /// ボタンがダブルクリックされてからトリプルクリックされるまでの計測時間
+        /// </summary>
+        private int clickInterval = 0;
 
         /// <summary>
         /// タイマーで時間が来たら音声を再生させるイベントハンドラ
@@ -106,10 +119,9 @@ namespace VoiceCountdown
                 var m = sw.Elapsed.Minutes;
                 var s = sw.Elapsed.Seconds;
                 var ts = timeSpan - new TimeSpan(h, m, s);
-                if (ts.TotalSeconds < 0)
+                if (ts.TotalSeconds <= 0)
                 {
-                    Button_Click();
-                    return;
+                    Reset_Click();
                 }
                 label2.Text = ts.ToString(@"mm\:ss");
                 for (int j = current; j < checkedListBox1.Items.Count; j++)
@@ -175,66 +187,269 @@ namespace VoiceCountdown
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void SplitContainer2_Panel1_SizeChanged(object sender, EventArgs e) => TimeLabel_Resize();
+        private void SplitContainer1_Panel2_SizeChanged(object sender, EventArgs e) => ControlSizeChange((SplitterPanel)sender, label2);
         /// <summary>
-        /// サイズ変更で時間表示の文字サイズを変更する実処理
+        /// labelのコントロールサイズを基にしてフォントサイズを自動調節する
         /// </summary>
-        private void TimeLabel_Resize()
+        /// <param name="controlP">親コントロール</param>
+        /// <param name="controlC">子コントロール</param>
+        private void ControlSizeChange(Control controlP, Control controlC)
         {
-            Font labelFont = label2.Font;
-            Size labelSize = label2.Size;
-            int fontSize = (int)(Math.Min(labelSize.Width, labelSize.Height) * 0.55);
-            labelFont = new Font(labelFont.FontFamily, fontSize);
-            label2.Font = labelFont;
+            // コントロールが初期化済みなら
+            if (!initialized) { return; }
+            int val = 0;
+            Point p = GetControlLocation(controlP, controlC);
+            while (controlC.Font.Size - 1 > 0 && (p.X != 0 || p.Y != 0))
+            {
+                if (p.X < 0 || p.Y < 0)
+                {
+                    // 文字を小さくする
+                    p = ResizeFont(controlP, controlC, -1f);
+                    if (val == 1)
+                    {
+                        break;
+                    }
+                    val = -1;
+                }
+                else
+                {
+                    // 文字を大きくする
+                    p = ResizeFont(controlP, controlC, 1f);
+                    if (val == -1)
+                    {
+                        // 文字を小さくする
+                        p = ResizeFont(controlP, controlC, -1f);
+                        break;
+                    }
+                    val = 1;
+                }
+            }
+            controlC.Location = p + new Size(Margin.Left, Margin.Top);
+        }
+        private Point ResizeFont(Control controlP, Control controlC, float emSize)
+        {
+            controlC.Font = new Font(controlC.Font.FontFamily, (float)(controlC.Font.Size + emSize), controlC.Font.Style);
+            return GetControlLocation(controlP, controlC);
+        }
+        private Point GetControlLocation(Control controlP, Control controlC)
+        {
+            Size s = controlP.ClientSize - controlC.ClientSize;
+            return new Point(
+                (s.Width - Margin.Left - Margin.Right) / 2,
+                (s.Height - Margin.Top - Margin.Bottom) / 2);
         }
 
         /// <summary>
-        /// タイマーの開始，停止を変更するイベントハンドラ
+        /// カウントダウンを開始するイベントハンドラ
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Button1_Click(object sender, EventArgs e) => Button_Click();
+        private void Start_Click(object sender, EventArgs e)
+        {
+            if (selectToolStripMenuItem.Checked)
+            {
+                ButtonWithPause_Click();
+            }
+            else
+            {
+                ButtonWithoutPause_Click();
+            }
+        }
+
         /// <summary>
-        /// タイマーの開始，停止を変更する実処理
+        /// カウントダウンをリセットするイベントハンドラ
         /// </summary>
-        private void Button_Click()
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Reset_Click(object sender, EventArgs e)
+        {
+            Reset_Click();
+        }
+
+        /// <summary>
+        /// カウントダウンをリセットする実処理
+        /// </summary>
+        private void Reset_Click()
+        {
+            if (selectToolStripMenuItem.Checked)
+            {
+                clickCount = 2;
+                ButtonWithPause_Click();
+            }
+            else
+            {
+                ButtonWithoutPause_Click();
+            }
+        }
+        /// <summary>
+        /// タイマーの開始，リセットを変更する実処理（一時停止機能あり）
+        /// </summary>
+        private void ButtonWithPause_Click()
+        {
+            // クリック数カウント
+            clickCount++;
+            if (clickCount == 1)
+            {
+                clickInterval = 0;
+                System.Windows.Forms.Timer t = new()
+                {
+                    Interval = SystemInformation.DoubleClickTime
+                };
+                t.Start();
+                t.Tick += (s, args) =>
+                {
+                    if (clickCount != 2)
+                    {
+                        clickCount = 0;
+                    }
+                    t.Stop();
+                };
+            }
+            // ダブルクリックだったらトリプルクリックの計測開始
+            else
+            {
+                System.Windows.Forms.Timer t = new()
+                {
+                    Interval = 100
+                };
+                t.Start();
+                t.Tick += (s, args) =>
+                {
+                    // 時間計測
+                    clickInterval += t.Interval;
+                    // ダブルクリック間隔の時間を超えたらリセット
+                    if (SystemInformation.DoubleClickTime < clickInterval)
+                    {
+                        t.Stop();
+                        clickInterval = 0;
+                        clickCount = 0;
+                        if (timer1.Enabled)
+                        {
+                            // タイマーが開始していたら一時停止ボタンにする
+                            button1.BackgroundImage = Resources.Pause;
+                        }
+                        else
+                        {
+                            // タイマーが停止していたら開始ボタンにする
+                            button1.BackgroundImage = Resources.Play;
+                        }
+                    }
+                };
+            }
+            // ダブルクリック間隔の時間を超えるまで処理
+            if (clickInterval < SystemInformation.DoubleClickTime)
+            {
+                if (clickCount == 3)
+                {
+                    clickCount = 0;
+                    // トリプルクリックされたときの処理を記述
+                    button1.BackgroundImage = Resources.Play;
+                    // オーディオを停止する
+                    audioPlayer?.Stop();
+                    // タイマーを停止する
+                    timer1.Stop();
+                    // ストップウォッチをリセットする
+                    sw.Reset();
+                    label2.Text = "00:00";
+                    dateTimePicker1.Enabled = true;
+                    stopToolStripMenuItem.Enabled = false;
+                    startToolStripMenuItem.Text = "開始";
+                    selectToolStripMenuItem.Enabled = true;
+                }
+                else
+                {
+                    if (timer1.Enabled)
+                    {
+                        // オーディオを停止する
+                        audioPlayer?.Stop();
+                        // タイマーを停止する
+                        timer1.Stop();
+                        // ストップウォッチを止める
+                        sw.Stop();
+                        button1.BackgroundImage = Resources.Play;
+                        startToolStripMenuItem.Enabled = true;
+                        startToolStripMenuItem.Text = "再開";
+                    }
+                    else
+                    {
+                        current = 0;
+                        timeSpan = dateTimePicker1.Value - baseDate;
+                        // タイマーを開始する
+                        timer1.Start();
+                        // ストップウォッチを開始する
+                        sw.Start();
+                        button1.BackgroundImage = Resources.Pause;
+                        dateTimePicker1.Enabled = false;
+                        stopToolStripMenuItem.Enabled = true;
+                        startToolStripMenuItem.Text = "一時停止";
+                        selectToolStripMenuItem.Enabled = false;
+                    }
+                    if (clickCount == 2)
+                    {
+                        button1.BackgroundImage = Resources.Stop;
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// タイマーの開始，リセットを変更する実処理（一時停止機能なし）
+        /// </summary>
+        private void ButtonWithoutPause_Click()
         {
             if (timer1.Enabled)
             {
-                audioPlayer?.Stop();
                 button1.BackgroundImage = Resources.Play;
+                // オーディオを停止する
+                audioPlayer?.Stop();
                 // タイマーを停止する
                 timer1.Stop();
-                // ストップウォッチを止める
-                sw.Stop();
+                // ストップウォッチをリセットする
                 sw.Reset();
                 label2.Text = "00:00";
                 dateTimePicker1.Enabled = true;
                 startToolStripMenuItem.Enabled = true;
                 stopToolStripMenuItem.Enabled = false;
+                selectToolStripMenuItem.Enabled = true;
             }
             else
             {
                 current = 0;
-                button1.BackgroundImage = Resources.Stop;
                 timeSpan = dateTimePicker1.Value - baseDate;
                 // タイマーを開始する
                 timer1.Start();
                 // ストップウォッチを開始する
                 sw.Start();
+                button1.BackgroundImage = Resources.Stop;
                 dateTimePicker1.Enabled = false;
                 startToolStripMenuItem.Enabled = false;
                 stopToolStripMenuItem.Enabled = true;
+                selectToolStripMenuItem.Enabled = false;
             }
         }
 
         /// <summary>
-        /// バージョン情報を表示するイベントハンドラ
+        /// 一時停止機能を使用するかを選択するイベントハンドラ
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void AboutToolStripMenuItem_Click(object sender, EventArgs e) =>
-            MessageBox.Show("VoiceCountdown\r\n\r\nVersion 20230501\r\nあみたろの声素材工房(https://amitaro.net/)の音声を使用しました");
+        private void SelectToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            selectToolStripMenuItem.Checked = !selectToolStripMenuItem.Checked;
+        }
+
+        /// <summary>
+        /// フォントダイアログを表示するイベントハンドラ
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void FontToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (fontDialog1.ShowDialog() == DialogResult.OK)
+            {
+                label2.Font = new Font(fontDialog1.Font.FontFamily, label2.Font.Size);
+                ControlSizeChange(splitContainer1.Panel2, label2);
+            }
+        }
 
         /// <summary>
         /// 終了イベントハンドラ
@@ -245,6 +460,16 @@ namespace VoiceCountdown
         {
             audioPlayer?.Stop();
             Close();
+        }
+
+        /// <summary>
+        /// バージョン情報を表示するイベントハンドラ
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("VoiceCountdown\r\n\r\nVersion 20230508\r\nあみたろの声素材工房(https://amitaro.net/)の音声を使用しました");
         }
     }
 }
