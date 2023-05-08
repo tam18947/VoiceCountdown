@@ -41,6 +41,7 @@
             startToolStripMenuItem = new ToolStripMenuItem();
             stopToolStripMenuItem = new ToolStripMenuItem();
             toolStripSeparator2 = new ToolStripSeparator();
+            selectToolStripMenuItem = new ToolStripMenuItem();
             fontToolStripMenuItem = new ToolStripMenuItem();
             toolStripSeparator1 = new ToolStripSeparator();
             exitToolStripMenuItem = new ToolStripMenuItem();
@@ -51,7 +52,6 @@
             toolStripStatusLabel1 = new ToolStripStatusLabel();
             timer1 = new System.Windows.Forms.Timer(components);
             fontDialog1 = new FontDialog();
-            timer2 = new System.Windows.Forms.Timer(components);
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
@@ -76,6 +76,7 @@
             // 
             // splitContainer1.Panel2
             // 
+            splitContainer1.Panel2.BackColor = Color.White;
             splitContainer1.Panel2.Controls.Add(label2);
             splitContainer1.Panel2.SizeChanged += SplitContainer1_Panel2_SizeChanged;
             splitContainer1.Size = new Size(600, 389);
@@ -129,7 +130,7 @@
             button1.Size = new Size(100, 100);
             button1.TabIndex = 3;
             button1.UseVisualStyleBackColor = false;
-            button1.Click += Button1_Click;
+            button1.Click += Start_Click;
             // 
             // label2
             // 
@@ -152,7 +153,7 @@
             // 
             // fileToolStripMenuItem
             // 
-            fileToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { startToolStripMenuItem, stopToolStripMenuItem, toolStripSeparator2, fontToolStripMenuItem, toolStripSeparator1, exitToolStripMenuItem });
+            fileToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { startToolStripMenuItem, stopToolStripMenuItem, toolStripSeparator2, selectToolStripMenuItem, fontToolStripMenuItem, toolStripSeparator1, exitToolStripMenuItem });
             fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             fileToolStripMenuItem.Size = new Size(67, 20);
             fileToolStripMenuItem.Text = "ファイル(&F)";
@@ -160,39 +161,46 @@
             // startToolStripMenuItem
             // 
             startToolStripMenuItem.Name = "startToolStripMenuItem";
-            startToolStripMenuItem.Size = new Size(130, 22);
+            startToolStripMenuItem.Size = new Size(146, 22);
             startToolStripMenuItem.Text = "開始(&S)";
-            startToolStripMenuItem.Click += Button1_Click;
+            startToolStripMenuItem.Click += Start_Click;
             // 
             // stopToolStripMenuItem
             // 
             stopToolStripMenuItem.Enabled = false;
             stopToolStripMenuItem.Name = "stopToolStripMenuItem";
-            stopToolStripMenuItem.Size = new Size(130, 22);
+            stopToolStripMenuItem.Size = new Size(146, 22);
             stopToolStripMenuItem.Text = "リセット(&R)";
-            stopToolStripMenuItem.Click += StopToolStripMenuItem_Click;
+            stopToolStripMenuItem.Click += Reset_Click;
             // 
             // toolStripSeparator2
             // 
             toolStripSeparator2.Name = "toolStripSeparator2";
-            toolStripSeparator2.Size = new Size(127, 6);
+            toolStripSeparator2.Size = new Size(143, 6);
+            // 
+            // selectToolStripMenuItem
+            // 
+            selectToolStripMenuItem.Name = "selectToolStripMenuItem";
+            selectToolStripMenuItem.Size = new Size(146, 22);
+            selectToolStripMenuItem.Text = "一時停止機能";
+            selectToolStripMenuItem.Click += SelectToolStripMenuItem_Click;
             // 
             // fontToolStripMenuItem
             // 
             fontToolStripMenuItem.Name = "fontToolStripMenuItem";
-            fontToolStripMenuItem.Size = new Size(130, 22);
+            fontToolStripMenuItem.Size = new Size(146, 22);
             fontToolStripMenuItem.Text = "フォント(&F)...";
             fontToolStripMenuItem.Click += FontToolStripMenuItem_Click;
             // 
             // toolStripSeparator1
             // 
             toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new Size(127, 6);
+            toolStripSeparator1.Size = new Size(143, 6);
             // 
             // exitToolStripMenuItem
             // 
             exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            exitToolStripMenuItem.Size = new Size(130, 22);
+            exitToolStripMenuItem.Size = new Size(146, 22);
             exitToolStripMenuItem.Text = "終了(&X)";
             exitToolStripMenuItem.Click += ExitToolStripMenuItem_Click;
             // 
@@ -240,10 +248,6 @@
             // fontDialog1
             // 
             fontDialog1.ShowEffects = false;
-            // 
-            // timer2
-            // 
-            timer2.Tick += Timer2_Tick;
             // 
             // Form1
             // 
@@ -294,6 +298,6 @@
         private ToolStripMenuItem fontToolStripMenuItem;
         private FontDialog fontDialog1;
         private ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.Timer timer2;
+        private ToolStripMenuItem selectToolStripMenuItem;
     }
 }

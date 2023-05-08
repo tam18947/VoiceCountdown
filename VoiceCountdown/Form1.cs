@@ -117,10 +117,9 @@ namespace VoiceCountdown
                 var m = sw.Elapsed.Minutes;
                 var s = sw.Elapsed.Seconds;
                 var ts = timeSpan - new TimeSpan(h, m, s);
-                if (ts.TotalSeconds < 0)
+                if (ts.TotalSeconds <= 0)
                 {
-                    Button_Click();
-                    return;
+                    Reset_Click(new object(), new EventArgs());
                 }
                 label2.Text = ts.ToString(@"mm\:ss");
                 for (int j = current; j < checkedListBox1.Items.Count; j++)
@@ -242,20 +241,42 @@ namespace VoiceCountdown
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Button1_Click(object sender, EventArgs e) => Button_Click();
+        private void Start_Click(object sender, EventArgs e)
+        {
+            if (selectToolStripMenuItem.Checked)
+            {
+                ButtonWithPause_Click();
+            }
+            else
+            {
+                ButtonWithoutPause_Click();
+            }
+        }
+
+        private void Reset_Click(object sender, EventArgs e)
+        {
+            if (selectToolStripMenuItem.Checked)
+            {
+                clickCount = 2;
+                ButtonWithPause_Click();
+            }
+            else
+            {
+                ButtonWithoutPause_Click();
+            }
+        }
+
         /// <summary>
         /// タイマーの開始，停止を変更する実処理
         /// </summary>
-        private void Button_Click()
+        private void ButtonWithPause_Click()
         {
             // クリック数カウント
             clickCount++;
-            // ダブルクリックだったらトリプルクリックの計測開始
             if (isFirstClick)
             {
                 isFirstClick = false;
                 clickInterval = 0;
-                timer2.Start();
                 System.Windows.Forms.Timer t = new()
                 {
                     Interval = SystemInformation.DoubleClickTime
@@ -263,13 +284,47 @@ namespace VoiceCountdown
                 t.Start();
                 t.Tick += (s, args) =>
                 {
-                    if (clickCount == 1)
+                    if (clickCount != 2)
                     {
-                        timer2.Stop();
-                        isFirstClick = true;
+                        if (clickCount == 1)
+                        {
+                            isFirstClick = true;
+                        }
+                        clickCount = 0;
                     }
                     t.Stop();
-                    clickCount = 0;
+                };
+            }
+            // ダブルクリックだったらトリプルクリックの計測開始
+            else
+            {
+                System.Windows.Forms.Timer t = new()
+                {
+                    Interval = 100
+                };
+                t.Start();
+                t.Tick += (s, args) =>
+                {
+                    // 時間計測
+                    clickInterval += t.Interval;
+                    // ダブルクリック間隔の時間を超えたらリセット
+                    if (SystemInformation.DoubleClickTime < clickInterval)
+                    {
+                        t.Stop();
+                        clickInterval = 0;
+                        isFirstClick = true;
+                        clickCount = 0;
+                        if (timer1.Enabled)
+                        {
+                            // タイマーが開始していたら一時停止ボタンにする
+                            button1.BackgroundImage = Resources.Pause;
+                        }
+                        else
+                        {
+                            // タイマーが停止していたら開始ボタンにする
+                            button1.BackgroundImage = Resources.Play;
+                        }
+                    }
                 };
             }
             // ダブルクリック間隔の時間を超えるまで処理
@@ -290,6 +345,7 @@ namespace VoiceCountdown
                     dateTimePicker1.Enabled = true;
                     stopToolStripMenuItem.Enabled = false;
                     startToolStripMenuItem.Text = "開始";
+                    selectToolStripMenuItem.Enabled = true;
                 }
                 else
                 {
@@ -317,6 +373,7 @@ namespace VoiceCountdown
                         dateTimePicker1.Enabled = false;
                         stopToolStripMenuItem.Enabled = true;
                         startToolStripMenuItem.Text = "一時停止";
+                        selectToolStripMenuItem.Enabled = false;
                     }
                     if (clickCount == 2)
                     {
@@ -325,24 +382,47 @@ namespace VoiceCountdown
                 }
             }
         }
-
-        /// <summary>
-        /// バージョン情報を表示するイベントハンドラ
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void AboutToolStripMenuItem_Click(object sender, EventArgs e) =>
-            MessageBox.Show("VoiceCountdown\r\n\r\nVersion 20230502\r\nあみたろの声素材工房(https://amitaro.net/)の音声を使用しました");
-
-        /// <summary>
-        /// 終了イベントハンドラ
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ButtonWithoutPause_Click()
         {
-            audioPlayer?.Stop();
-            Close();
+            if (timer1.Enabled)
+            {
+                button1.BackgroundImage = Resources.Play;
+                // オーディオを停止する
+                audioPlayer?.Stop();
+                // タイマーを停止する
+                timer1.Stop();
+                // ストップウォッチをリセットする
+                sw.Reset();
+                label2.Text = "00:00";
+                dateTimePicker1.Enabled = true;
+                startToolStripMenuItem.Enabled = true;
+                stopToolStripMenuItem.Enabled = false;
+                selectToolStripMenuItem.Enabled = true;
+            }
+            else
+            {
+                current = 0;
+                timeSpan = dateTimePicker1.Value - baseDate;
+                // タイマーを開始する
+                timer1.Start();
+                // ストップウォッチを開始する
+                sw.Start();
+                button1.BackgroundImage = Resources.Stop;
+                dateTimePicker1.Enabled = false;
+                startToolStripMenuItem.Enabled = false;
+                stopToolStripMenuItem.Enabled = true;
+                selectToolStripMenuItem.Enabled = false;
+            }
+        }
+
+        /// <summary>
+        /// 一時停止機能を使用するかを選択するイベントハンドラ
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SelectToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            selectToolStripMenuItem.Checked = !selectToolStripMenuItem.Checked;
         }
 
         /// <summary>
@@ -359,34 +439,25 @@ namespace VoiceCountdown
             }
         }
 
-        private void Timer2_Tick(object sender, EventArgs e)
+        /// <summary>
+        /// 終了イベントハンドラ
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // 時間計測
-            clickInterval += timer2.Interval;
-            // ダブルクリック間隔の時間を超えたらリセット
-            if (SystemInformation.DoubleClickTime < clickInterval)
-            {
-                timer2.Stop();
-                clickInterval = 0;
-                isFirstClick = true;
-                clickCount = 0;
-                if (timer1.Enabled)
-                {
-                    // タイマーが開始していたら一時停止ボタンにする
-                    button1.BackgroundImage = Resources.Pause;
-                }
-                else
-                {
-                    // タイマーが停止していたら開始ボタンにする
-                    button1.BackgroundImage = Resources.Play;
-                }
-            }
+            audioPlayer?.Stop();
+            Close();
         }
 
-        private void StopToolStripMenuItem_Click(object sender, EventArgs e)
+        /// <summary>
+        /// バージョン情報を表示するイベントハンドラ
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            clickCount = 2;
-            Button_Click();
+            MessageBox.Show("VoiceCountdown\r\n\r\nVersion 20230508\r\nあみたろの声素材工房(https://amitaro.net/)の音声を使用しました");
         }
     }
 }
