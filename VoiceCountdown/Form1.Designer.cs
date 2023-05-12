@@ -234,12 +234,13 @@
             toolStripDropDownButton1.Size = new Size(81, 20);
             toolStripDropDownButton1.Tag = "";
             toolStripDropDownButton1.Text = "出力デバイス";
+            toolStripDropDownButton1.Click += ToolStripDropDownButton1_Click;
             // 
             // toolStripStatusLabel1
             // 
             toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            toolStripStatusLabel1.Size = new Size(132, 17);
-            toolStripStatusLabel1.Text = "選択された出力デバイス名";
+            toolStripStatusLabel1.Size = new Size(78, 17);
+            toolStripStatusLabel1.Text = "既定のデバイス";
             // 
             // timer1
             // 
