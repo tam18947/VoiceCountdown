@@ -502,7 +502,7 @@ namespace VoiceCountdown
         /// <param name="e"></param>
         private void AboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("VoiceCountdown\r\n\r\nVersion 20230508\r\nあみたろの声素材工房(https://amitaro.net/)の音声を使用しました");
+            MessageBox.Show("VoiceCountdown\r\n\r\nVersion 20230512\r\nあみたろの声素材工房(https://amitaro.net/)の音声を使用しました");
         }
     }
 }
