@@ -32,6 +32,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             splitContainer1 = new SplitContainer();
             checkedListBox1 = new CheckedListBox();
+            label3 = new Label();
             label1 = new Label();
             dateTimePicker1 = new DateTimePicker();
             button1 = new Button();
@@ -70,6 +71,7 @@
             // splitContainer1.Panel1
             // 
             splitContainer1.Panel1.Controls.Add(checkedListBox1);
+            splitContainer1.Panel1.Controls.Add(label3);
             splitContainer1.Panel1.Controls.Add(label1);
             splitContainer1.Panel1.Controls.Add(dateTimePicker1);
             splitContainer1.Panel1.Controls.Add(button1);
@@ -79,7 +81,7 @@
             splitContainer1.Panel2.BackColor = Color.White;
             splitContainer1.Panel2.Controls.Add(label2);
             splitContainer1.Panel2.SizeChanged += SplitContainer1_Panel2_SizeChanged;
-            splitContainer1.Size = new Size(600, 389);
+            splitContainer1.Size = new Size(560, 429);
             splitContainer1.SplitterDistance = 100;
             splitContainer1.SplitterWidth = 12;
             splitContainer1.TabIndex = 1;
@@ -93,8 +95,18 @@
             checkedListBox1.Items.AddRange(new object[] { "10分前", "5分前", "4分前", "3分前", "2分前", "1分前", "30秒前", "10秒前", "5", "4", "3", "2", "1" });
             checkedListBox1.Location = new Point(0, 15);
             checkedListBox1.Name = "checkedListBox1";
-            checkedListBox1.Size = new Size(100, 251);
+            checkedListBox1.Size = new Size(100, 276);
             checkedListBox1.TabIndex = 1;
+            // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Dock = DockStyle.Bottom;
+            label3.Location = new Point(0, 291);
+            label3.Name = "label3";
+            label3.Size = new Size(90, 15);
+            label3.TabIndex = 4;
+            label3.Text = "タイマー開始時間";
             // 
             // label1
             // 
@@ -110,7 +122,7 @@
             // 
             dateTimePicker1.Dock = DockStyle.Bottom;
             dateTimePicker1.Format = DateTimePickerFormat.Time;
-            dateTimePicker1.Location = new Point(0, 266);
+            dateTimePicker1.Location = new Point(0, 306);
             dateTimePicker1.Name = "dateTimePicker1";
             dateTimePicker1.ShowUpDown = true;
             dateTimePicker1.Size = new Size(100, 23);
@@ -125,12 +137,14 @@
             button1.Dock = DockStyle.Bottom;
             button1.FlatStyle = FlatStyle.Flat;
             button1.ForeColor = SystemColors.Control;
-            button1.Location = new Point(0, 289);
+            button1.Location = new Point(0, 329);
             button1.Name = "button1";
             button1.Size = new Size(100, 100);
             button1.TabIndex = 3;
             button1.UseVisualStyleBackColor = false;
             button1.Click += Start_Click;
+            button1.MouseEnter += Button1_MouseEnter;
+            button1.MouseLeave += Button1_MouseLeave;
             // 
             // label2
             // 
@@ -147,7 +161,7 @@
             menuStrip1.Items.AddRange(new ToolStripItem[] { fileToolStripMenuItem, helpToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
-            menuStrip1.Size = new Size(624, 24);
+            menuStrip1.Size = new Size(584, 24);
             menuStrip1.TabIndex = 0;
             menuStrip1.Text = "menuStrip1";
             // 
@@ -221,9 +235,9 @@
             // statusStrip1
             // 
             statusStrip1.Items.AddRange(new ToolStripItem[] { toolStripDropDownButton1, toolStripStatusLabel1 });
-            statusStrip1.Location = new Point(0, 419);
+            statusStrip1.Location = new Point(0, 459);
             statusStrip1.Name = "statusStrip1";
-            statusStrip1.Size = new Size(624, 22);
+            statusStrip1.Size = new Size(584, 22);
             statusStrip1.TabIndex = 2;
             statusStrip1.Text = "statusStrip1";
             // 
@@ -234,12 +248,13 @@
             toolStripDropDownButton1.Size = new Size(81, 20);
             toolStripDropDownButton1.Tag = "";
             toolStripDropDownButton1.Text = "出力デバイス";
+            toolStripDropDownButton1.Click += ToolStripDropDownButton1_Click;
             // 
             // toolStripStatusLabel1
             // 
             toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            toolStripStatusLabel1.Size = new Size(132, 17);
-            toolStripStatusLabel1.Text = "選択された出力デバイス名";
+            toolStripStatusLabel1.Size = new Size(78, 17);
+            toolStripStatusLabel1.Text = "既定のデバイス";
             // 
             // timer1
             // 
@@ -254,7 +269,7 @@
             AcceptButton = button1;
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(624, 441);
+            ClientSize = new Size(584, 481);
             Controls.Add(splitContainer1);
             Controls.Add(menuStrip1);
             Controls.Add(statusStrip1);
@@ -299,5 +314,6 @@
         private FontDialog fontDialog1;
         private ToolStripSeparator toolStripSeparator1;
         private ToolStripMenuItem selectToolStripMenuItem;
+        private Label label3;
     }
 }

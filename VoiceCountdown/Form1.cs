@@ -8,25 +8,11 @@ namespace VoiceCountdown
         public Form1()
         {
             InitializeComponent();
-            for (int i = 0; i < checkedListBox1.Items.Count; i++)
+            for (int i = 0; i < checkedListBox1.Items.Count - 2; i++)
             {
                 checkedListBox1.SetItemChecked(i, true);
             }
-            var devices = AudioPlayer.GetDevices();
-            for (int i = 0; i < devices.Count; i++)
-            {
-                // ドロップダウンリストに表示するアイテムを作成する
-                ToolStripMenuItem item = new(devices[i]);
-                // アイテムがクリックされたときのイベントハンドラを設定する
-                item.Click += new EventHandler(ToolStripMenuItem_Click);
-                toolStripDropDownButton1.DropDownItems.Add(item);
-                if (i == 0)
-                {
-                    checkedDeviceIndex = i;
-                    toolStripStatusLabel1.Text = devices[i];
-                    item.Checked = true;
-                }
-            }
+            ToolStripDropDownButton1_Click();
             initialized = true;
             ControlSizeChange(splitContainer1.Panel2, label2);
         }
@@ -137,16 +123,26 @@ namespace VoiceCountdown
                         {
                             audioPlayer?.Stop();
                             int ind = 0;
-                            var devices = AudioPlayer.GetDevices();
-                            for (int i = 0; i < devices.Count; i++)
+                            if (checkedDeviceIndex == -1)
                             {
-                                if (devices[i] == toolStripDropDownButton1.DropDownItems[checkedDeviceIndex].ToString())
-                                { break; }
-                                else
-                                { ind++; }
+                                ind = -1;
                             }
-                            if (devices.Count == ind)
-                            { ind = -1; }
+                            else
+                            {
+                                var devices = AudioPlayer.GetDevices();
+                                for (int i = 0; i < devices.Count; i++)
+                                {
+                                    if (devices[i] == toolStripStatusLabel1.Text)
+                                    { break; }
+                                    else
+                                    { ind++; }
+                                }
+                                if (devices.Count == ind)
+                                {
+                                    ind = checkedDeviceIndex = -1;
+                                    toolStripStatusLabel1.Text = "既定のデバイス";
+                                }
+                            }
                             audioPlayer = new AudioPlayer(@"wav\" + wavFiles[j], ind);
                             audioPlayer.Play();
                             break;
@@ -157,7 +153,7 @@ namespace VoiceCountdown
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Unplayable File");
+                MessageBox.Show(ex.Message, "Exception");
             }
         }
 
@@ -261,15 +257,7 @@ namespace VoiceCountdown
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Reset_Click(object sender, EventArgs e)
-        {
-            Reset_Click();
-        }
-
-        /// <summary>
-        /// カウントダウンをリセットする実処理
-        /// </summary>
-        private void Reset_Click()
+        private void Reset_Click(object? sender = null, EventArgs? e = null)
         {
             if (selectToolStripMenuItem.Checked)
             {
@@ -281,6 +269,7 @@ namespace VoiceCountdown
                 ButtonWithoutPause_Click();
             }
         }
+
         /// <summary>
         /// タイマーの開始，リセットを変更する実処理（一時停止機能あり）
         /// </summary>
@@ -306,7 +295,7 @@ namespace VoiceCountdown
                 };
             }
             // ダブルクリックだったらトリプルクリックの計測開始
-            else
+            else if (clickCount == 2)
             {
                 System.Windows.Forms.Timer t = new()
                 {
@@ -428,6 +417,50 @@ namespace VoiceCountdown
         }
 
         /// <summary>
+        /// 出力デバイスを選択するイベントハンドラ
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ToolStripDropDownButton1_Click(object? sender = null, EventArgs? e = null)
+        {
+            bool b = true;
+            var devices = AudioPlayer.GetDevices();
+            if (devices.Count == toolStripDropDownButton1.DropDownItems.Count)
+            {
+                foreach (ToolStripMenuItem item in toolStripDropDownButton1.DropDownItems)
+                {
+                    b = b && devices.Contains(item.Text);
+                }
+            }
+            else
+            {
+                b = false;
+            }
+            if (!b)
+            {
+                checkedDeviceIndex = -1;
+                toolStripDropDownButton1.DropDownItems.Clear();
+                for (int i = 0; i < devices.Count; i++)
+                {
+                    // ドロップダウンリストに表示するアイテムを作成する
+                    ToolStripMenuItem item = new(devices[i]);
+                    // アイテムがクリックされたときのイベントハンドラを設定する
+                    item.Click += new EventHandler(ToolStripMenuItem_Click);
+                    toolStripDropDownButton1.DropDownItems.Add(item);
+                    if (devices[i] == toolStripStatusLabel1.Text)
+                    {
+                        checkedDeviceIndex = i;
+                        item.Checked = true;
+                    }
+                }
+                if (checkedDeviceIndex == -1)
+                {
+                    toolStripStatusLabel1.Text = "既定のデバイス";
+                }
+            }
+        }
+
+        /// <summary>
         /// 一時停止機能を使用するかを選択するイベントハンドラ
         /// </summary>
         /// <param name="sender"></param>
@@ -469,7 +502,11 @@ namespace VoiceCountdown
         /// <param name="e"></param>
         private void AboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("VoiceCountdown\r\n\r\nVersion 20230508\r\nあみたろの声素材工房(https://amitaro.net/)の音声を使用しました");
+            MessageBox.Show("VoiceCountdown\r\n\r\nVersion 20230602\r\nあみたろの声素材工房(https://amitaro.net/)の音声を使用しました");
         }
+
+        private void Button1_MouseEnter(object sender, EventArgs e) => Cursor = Cursors.Hand;
+
+        private void Button1_MouseLeave(object sender, EventArgs e) => Cursor = Cursors.Default;
     }
 }
