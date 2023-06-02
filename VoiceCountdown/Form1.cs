@@ -8,7 +8,7 @@ namespace VoiceCountdown
         public Form1()
         {
             InitializeComponent();
-            for (int i = 0; i < checkedListBox1.Items.Count; i++)
+            for (int i = 0; i < checkedListBox1.Items.Count - 2; i++)
             {
                 checkedListBox1.SetItemChecked(i, true);
             }
@@ -502,7 +502,11 @@ namespace VoiceCountdown
         /// <param name="e"></param>
         private void AboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("VoiceCountdown\r\n\r\nVersion 20230512\r\nあみたろの声素材工房(https://amitaro.net/)の音声を使用しました");
+            MessageBox.Show("VoiceCountdown\r\n\r\nVersion 20230602\r\nあみたろの声素材工房(https://amitaro.net/)の音声を使用しました");
         }
+
+        private void Button1_MouseEnter(object sender, EventArgs e) => Cursor = Cursors.Hand;
+
+        private void Button1_MouseLeave(object sender, EventArgs e) => Cursor = Cursors.Default;
     }
 }
