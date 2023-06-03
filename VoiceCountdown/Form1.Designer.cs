@@ -100,21 +100,19 @@
             // 
             // label3
             // 
-            label3.AutoSize = true;
             label3.Dock = DockStyle.Bottom;
             label3.Location = new Point(0, 291);
             label3.Name = "label3";
-            label3.Size = new Size(90, 15);
+            label3.Size = new Size(100, 15);
             label3.TabIndex = 4;
             label3.Text = "タイマー開始時間";
             // 
             // label1
             // 
-            label1.AutoSize = true;
             label1.Dock = DockStyle.Top;
             label1.Location = new Point(0, 0);
             label1.Name = "label1";
-            label1.Size = new Size(84, 15);
+            label1.Size = new Size(100, 15);
             label1.TabIndex = 0;
             label1.Text = "読み上げる時間";
             // 
@@ -277,7 +275,6 @@
             Name = "Form1";
             Text = "カウントダウンを読み上げます";
             splitContainer1.Panel1.ResumeLayout(false);
-            splitContainer1.Panel1.PerformLayout();
             splitContainer1.Panel2.ResumeLayout(false);
             splitContainer1.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
