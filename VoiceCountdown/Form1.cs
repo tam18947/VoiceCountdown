@@ -36,6 +36,23 @@ namespace VoiceCountdown
             "num002_01.wav",
             "num001_01.wav",
         };
+        private readonly UnmanagedMemoryStream[] wavStream = new UnmanagedMemoryStream[]
+        {
+            Resources.timer_10punmae_01,
+            Resources.timer_5funmae_01,
+            Resources.timer_4punmae_01,
+            Resources.timer_3punmae_01,
+            Resources.timer_2funmae_01,
+            Resources.timer_1punmae_01,
+            Resources._30byoumae,
+            Resources._10byoumae,
+            Resources.num005_01,
+            Resources.num004_01,
+            Resources.num003_01,
+            Resources.num002_01,
+            Resources.num001_01,
+        };
+
         /// <summary>
         /// 音声の時間をTimeSpanで用意する
         /// </summary>
@@ -143,7 +160,8 @@ namespace VoiceCountdown
                                     toolStripStatusLabel1.Text = "既定のデバイス";
                                 }
                             }
-                            audioPlayer = new AudioPlayer(@"wav\" + wavFiles[j], ind);
+                            //audioPlayer = new AudioPlayer(@"wav\" + wavFiles[j], ind);
+                            audioPlayer = new AudioPlayer(wavStream[j], ind);
                             audioPlayer.Play();
                             break;
                         }

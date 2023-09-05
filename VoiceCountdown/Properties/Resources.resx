@@ -127,4 +127,43 @@
   <data name="Pause" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Pause.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="10byoumae" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\wav\10byoumae.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="30byoumae" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\wav\30byoumae.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="num001_01" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\wav\num001_01.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="num002_01" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\wav\num002_01.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="num003_01" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\wav\num003_01.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="num004_01" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\wav\num004_01.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="num005_01" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\wav\num005_01.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="timer_10punmae_01" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\wav\timer_10punmae_01.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="timer_1punmae_01" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\wav\timer_1punmae_01.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="timer_2funmae_01" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\wav\timer_2funmae_01.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="timer_3punmae_01" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\wav\timer_3punmae_01.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="timer_4punmae_01" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\wav\timer_4punmae_01.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="timer_5funmae_01" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\wav\timer_5funmae_01.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
 </root>
