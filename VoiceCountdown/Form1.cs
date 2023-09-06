@@ -193,31 +193,34 @@ namespace VoiceCountdown
         {
             // コントロールが初期化済みなら
             if (!initialized) { return; }
-            int val = 0;
+            // コントロールの中心座標
             Point p = GetControlLocation(controlP, controlC);
-            while (controlC.Font.Size - 1 > 0 && (p.X != 0 || p.Y != 0))
+            bool flag = p.X > 0 && p.Y > 0;
+            while (true)
             {
                 if (p.X < 0 || p.Y < 0)
                 {
-                    // 文字を小さくする
-                    p = ResizeFont(controlP, controlC, -1f);
-                    if (val == 1)
+                    if (controlC.Font.Size <= 1)
                     {
                         break;
                     }
-                    val = -1;
+                    // 文字を小さくする
+                    p = ResizeFont(controlP, controlC, -1f);
+                    if (flag)
+                    {
+                        break;
+                    }
                 }
                 else
                 {
                     // 文字を大きくする
                     p = ResizeFont(controlP, controlC, 1f);
-                    if (val == -1)
+                    if (!flag)
                     {
                         // 文字を小さくする
                         p = ResizeFont(controlP, controlC, -1f);
                         break;
                     }
-                    val = 1;
                 }
             }
             controlC.Location = p + new Size(Margin.Left, Margin.Top);
@@ -502,7 +505,7 @@ namespace VoiceCountdown
         /// <param name="e"></param>
         private void AboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("VoiceCountdown\r\n\r\nVersion 20230603\r\nあみたろの声素材工房(https://amitaro.net/)の音声を使用しました");
+            MessageBox.Show("VoiceCountdown\r\n\r\nVersion 20230906\r\nあみたろの声素材工房(https://amitaro.net/)の音声を使用しました");
         }
 
         private void Button1_MouseEnter(object sender, EventArgs e) => Cursor = Cursors.Hand;
