@@ -20,22 +20,6 @@ namespace VoiceCountdown
         /// <summary>
         /// あみたろの声素材工房(https://amitaro.net/)の音声を使用しました
         /// </summary>
-        private readonly string[] wavFiles = new string[]
-        {
-            "timer_10punmae_01.wav",
-            "timer_5funmae_01.wav",
-            "timer_4punmae_01.wav",
-            "timer_3punmae_01.wav",
-            "timer_2funmae_01.wav",
-            "timer_1punmae_01.wav",
-            "30byoumae.wav",
-            "10byoumae.wav",
-            "num005_01.wav",
-            "num004_01.wav",
-            "num003_01.wav",
-            "num002_01.wav",
-            "num001_01.wav",
-        };
         private readonly UnmanagedMemoryStream[] wavStream = new UnmanagedMemoryStream[]
         {
             Resources.timer_10punmae_01,
@@ -160,7 +144,7 @@ namespace VoiceCountdown
                                     toolStripStatusLabel1.Text = "既定のデバイス";
                                 }
                             }
-                            //audioPlayer = new AudioPlayer(@"wav\" + wavFiles[j], ind);
+                            wavStream[j].Seek(0, SeekOrigin.Begin);
                             audioPlayer = new AudioPlayer(wavStream[j], ind);
                             audioPlayer.Play();
                             break;
@@ -523,7 +507,7 @@ namespace VoiceCountdown
         /// <param name="e"></param>
         private void AboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("VoiceCountdown\r\n\r\nVersion 20230906\r\nあみたろの声素材工房(https://amitaro.net/)の音声を使用しました");
+            MessageBox.Show("Voice Countdown -" + Text + "-\r\nVersion 20230906\r\n\r\n\r\nクレジット情報：\r\nあみたろの声素材工房(https://amitaro.net/)の音声を使用しました", "Voice Countdown のバージョン情報");
         }
 
         private void Button1_MouseEnter(object sender, EventArgs e) => Cursor = Cursors.Hand;

@@ -4,69 +4,48 @@ namespace VoiceCountdown
 {
     internal class AudioPlayer
     {
-        internal AudioPlayer(string audioPath, int index, int volume = 100)
+        internal AudioPlayer(Stream audioStream, int deviceNumber, int volume = 100)
         {
-            if (Path.GetExtension(audioPath) != ".mp3" &&
-                Path.GetExtension(audioPath) != ".wav")
+            if (audioStream.Position > 0)
             {
                 return;
             }
-
-            audioReader = new AudioFileReader(audioPath);
-            if (audioReader != null)
-            {
-                waveOutEvent = new WaveOutEvent
-                {
-                    DeviceNumber = index
-                };
-                waveOutEvent.Init(audioReader);
-                waveOutEvent.Volume = volume * 0.01f;
-            }
-        }
-        internal AudioPlayer(Stream audioStream, int index, int volume = 100)
-        {
             waveReader = new WaveFileReader(audioStream);
             if (waveReader != null)
             {
                 waveOutEvent = new WaveOutEvent
                 {
-                    DeviceNumber = index
+                    DeviceNumber = deviceNumber
                 };
                 waveOutEvent.Init(waveReader);
-                waveOutEvent.Volume = volume * 0.01f;
+                waveOutEvent.Volume = volume > 100 ? 1 : volume * 0.01f;
             }
         }
-        private readonly WaveFileReader? waveReader = null;
 
         private readonly WaveOutEvent? waveOutEvent = null;
-        private readonly AudioFileReader? audioReader = null;
+        private readonly WaveFileReader? waveReader = null;
 
         public void Play()
         {
-            if (null == waveOutEvent)
+            if (waveOutEvent is null)
             {
                 return;
             }
 
-            if (waveOutEvent is not null && waveOutEvent.PlaybackState != PlaybackState.Playing)
+            if (waveOutEvent.PlaybackState != PlaybackState.Playing)
             {
                 waveOutEvent.Play();
             }
         }
         public void Stop()
         {
-            //if (null == audioReader)
-            //{
-            //    return;
-            //}
-
-            if (waveOutEvent is not null && waveOutEvent.PlaybackState != PlaybackState.Stopped)
+            if (waveOutEvent is not null &&
+                waveOutEvent.PlaybackState != PlaybackState.Stopped)
             {
                 waveOutEvent.Stop();
-                audioReader?.Dispose();
-                waveReader?.Dispose();
-                waveOutEvent.Dispose();
             }
+            waveReader?.Dispose();
+            waveOutEvent?.Dispose();
         }
 
         public static List<string> GetDevices()
