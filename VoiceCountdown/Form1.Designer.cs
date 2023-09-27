@@ -31,11 +31,12 @@
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             splitContainer1 = new SplitContainer();
+            splitContainer2 = new SplitContainer();
             checkedListBox1 = new CheckedListBox();
-            label3 = new Label();
             label1 = new Label();
-            dateTimePicker1 = new DateTimePicker();
             button1 = new Button();
+            dateTimePicker1 = new DateTimePicker();
+            label3 = new Label();
             label2 = new Label();
             menuStrip1 = new MenuStrip();
             fileToolStripMenuItem = new ToolStripMenuItem();
@@ -57,6 +58,10 @@
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
             splitContainer1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)splitContainer2).BeginInit();
+            splitContainer2.Panel1.SuspendLayout();
+            splitContainer2.Panel2.SuspendLayout();
+            splitContainer2.SuspendLayout();
             menuStrip1.SuspendLayout();
             statusStrip1.SuspendLayout();
             SuspendLayout();
@@ -70,11 +75,7 @@
             // 
             // splitContainer1.Panel1
             // 
-            splitContainer1.Panel1.Controls.Add(checkedListBox1);
-            splitContainer1.Panel1.Controls.Add(label3);
-            splitContainer1.Panel1.Controls.Add(label1);
-            splitContainer1.Panel1.Controls.Add(dateTimePicker1);
-            splitContainer1.Panel1.Controls.Add(button1);
+            splitContainer1.Panel1.Controls.Add(splitContainer2);
             // 
             // splitContainer1.Panel2
             // 
@@ -83,9 +84,33 @@
             splitContainer1.Panel2.SizeChanged += SplitContainer1_Panel2_SizeChanged;
             splitContainer1.Size = new Size(560, 429);
             splitContainer1.SplitterDistance = 100;
-            splitContainer1.SplitterWidth = 12;
+            splitContainer1.SplitterWidth = 8;
             splitContainer1.TabIndex = 1;
             splitContainer1.TabStop = false;
+            // 
+            // splitContainer2
+            // 
+            splitContainer2.Dock = DockStyle.Fill;
+            splitContainer2.FixedPanel = FixedPanel.Panel2;
+            splitContainer2.Location = new Point(0, 0);
+            splitContainer2.Name = "splitContainer2";
+            splitContainer2.Orientation = Orientation.Horizontal;
+            // 
+            // splitContainer2.Panel1
+            // 
+            splitContainer2.Panel1.Controls.Add(checkedListBox1);
+            splitContainer2.Panel1.Controls.Add(label1);
+            // 
+            // splitContainer2.Panel2
+            // 
+            splitContainer2.Panel2.Controls.Add(button1);
+            splitContainer2.Panel2.Controls.Add(dateTimePicker1);
+            splitContainer2.Panel2.Controls.Add(label3);
+            splitContainer2.Size = new Size(100, 429);
+            splitContainer2.SplitterDistance = 283;
+            splitContainer2.SplitterWidth = 8;
+            splitContainer2.TabIndex = 0;
+            splitContainer2.TabStop = false;
             // 
             // checkedListBox1
             // 
@@ -95,17 +120,8 @@
             checkedListBox1.Items.AddRange(new object[] { "10分前", "5分前", "4分前", "3分前", "2分前", "1分前", "30秒前", "10秒前", "5", "4", "3", "2", "1" });
             checkedListBox1.Location = new Point(0, 15);
             checkedListBox1.Name = "checkedListBox1";
-            checkedListBox1.Size = new Size(100, 276);
+            checkedListBox1.Size = new Size(100, 268);
             checkedListBox1.TabIndex = 1;
-            // 
-            // label3
-            // 
-            label3.Dock = DockStyle.Bottom;
-            label3.Location = new Point(0, 291);
-            label3.Name = "label3";
-            label3.Size = new Size(100, 15);
-            label3.TabIndex = 4;
-            label3.Text = "タイマー開始時間";
             // 
             // label1
             // 
@@ -116,33 +132,42 @@
             label1.TabIndex = 0;
             label1.Text = "読み上げる時間";
             // 
-            // dateTimePicker1
-            // 
-            dateTimePicker1.Dock = DockStyle.Bottom;
-            dateTimePicker1.Format = DateTimePickerFormat.Time;
-            dateTimePicker1.Location = new Point(0, 306);
-            dateTimePicker1.Name = "dateTimePicker1";
-            dateTimePicker1.ShowUpDown = true;
-            dateTimePicker1.Size = new Size(100, 23);
-            dateTimePicker1.TabIndex = 2;
-            dateTimePicker1.Value = new DateTime(2000, 1, 1, 0, 5, 0, 0);
-            // 
             // button1
             // 
             button1.BackColor = Color.Transparent;
             button1.BackgroundImage = Properties.Resources.Play;
             button1.BackgroundImageLayout = ImageLayout.Zoom;
-            button1.Dock = DockStyle.Bottom;
+            button1.Dock = DockStyle.Fill;
             button1.FlatStyle = FlatStyle.Flat;
             button1.ForeColor = SystemColors.Control;
-            button1.Location = new Point(0, 329);
+            button1.Location = new Point(0, 38);
             button1.Name = "button1";
             button1.Size = new Size(100, 100);
-            button1.TabIndex = 3;
+            button1.TabIndex = 2;
             button1.UseVisualStyleBackColor = false;
             button1.Click += Start_Click;
             button1.MouseEnter += Button1_MouseEnter;
             button1.MouseLeave += Button1_MouseLeave;
+            // 
+            // dateTimePicker1
+            // 
+            dateTimePicker1.Dock = DockStyle.Top;
+            dateTimePicker1.Format = DateTimePickerFormat.Time;
+            dateTimePicker1.Location = new Point(0, 15);
+            dateTimePicker1.Name = "dateTimePicker1";
+            dateTimePicker1.ShowUpDown = true;
+            dateTimePicker1.Size = new Size(100, 23);
+            dateTimePicker1.TabIndex = 1;
+            dateTimePicker1.Value = new DateTime(2000, 1, 1, 0, 5, 0, 0);
+            // 
+            // label3
+            // 
+            label3.Dock = DockStyle.Top;
+            label3.Location = new Point(0, 0);
+            label3.Name = "label3";
+            label3.Size = new Size(100, 15);
+            label3.TabIndex = 0;
+            label3.Text = "タイマー開始時間";
             // 
             // label2
             // 
@@ -279,6 +304,10 @@
             splitContainer1.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
             splitContainer1.ResumeLayout(false);
+            splitContainer2.Panel1.ResumeLayout(false);
+            splitContainer2.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)splitContainer2).EndInit();
+            splitContainer2.ResumeLayout(false);
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
             statusStrip1.ResumeLayout(false);
@@ -312,5 +341,6 @@
         private ToolStripSeparator toolStripSeparator1;
         private ToolStripMenuItem selectToolStripMenuItem;
         private Label label3;
+        private SplitContainer splitContainer2;
     }
 }
