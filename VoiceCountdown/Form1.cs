@@ -20,22 +20,23 @@ namespace VoiceCountdown
         /// <summary>
         /// あみたろの声素材工房(https://amitaro.net/)の音声を使用しました
         /// </summary>
-        private readonly string[] wavFiles = new string[]
+        private readonly UnmanagedMemoryStream[] wavStream = new UnmanagedMemoryStream[]
         {
-            "timer_10punmae_01.wav",
-            "timer_5funmae_01.wav",
-            "timer_4punmae_01.wav",
-            "timer_3punmae_01.wav",
-            "timer_2funmae_01.wav",
-            "timer_1punmae_01.wav",
-            "30byoumae.wav",
-            "10byoumae.wav",
-            "num005_01.wav",
-            "num004_01.wav",
-            "num003_01.wav",
-            "num002_01.wav",
-            "num001_01.wav",
+            Resources.timer_10punmae_01,
+            Resources.timer_5funmae_01,
+            Resources.timer_4punmae_01,
+            Resources.timer_3punmae_01,
+            Resources.timer_2funmae_01,
+            Resources.timer_1punmae_01,
+            Resources._30byoumae,
+            Resources._10byoumae,
+            Resources.num005_01,
+            Resources.num004_01,
+            Resources.num003_01,
+            Resources.num002_01,
+            Resources.num001_01,
         };
+
         /// <summary>
         /// 音声の時間をTimeSpanで用意する
         /// </summary>
@@ -143,7 +144,8 @@ namespace VoiceCountdown
                                     toolStripStatusLabel1.Text = "既定のデバイス";
                                 }
                             }
-                            audioPlayer = new AudioPlayer(@"wav\" + wavFiles[j], ind);
+                            wavStream[j].Seek(0, SeekOrigin.Begin);
+                            audioPlayer = new AudioPlayer(wavStream[j], ind);
                             audioPlayer.Play();
                             break;
                         }
@@ -193,31 +195,34 @@ namespace VoiceCountdown
         {
             // コントロールが初期化済みなら
             if (!initialized) { return; }
-            int val = 0;
+            // コントロールの中心座標
             Point p = GetControlLocation(controlP, controlC);
-            while (controlC.Font.Size - 1 > 0 && (p.X != 0 || p.Y != 0))
+            bool flag = p.X > 0 && p.Y > 0;
+            while (true)
             {
                 if (p.X < 0 || p.Y < 0)
                 {
-                    // 文字を小さくする
-                    p = ResizeFont(controlP, controlC, -1f);
-                    if (val == 1)
+                    if (controlC.Font.Size <= 1)
                     {
                         break;
                     }
-                    val = -1;
+                    // 文字を小さくする
+                    p = ResizeFont(controlP, controlC, -1f);
+                    if (flag)
+                    {
+                        break;
+                    }
                 }
                 else
                 {
                     // 文字を大きくする
                     p = ResizeFont(controlP, controlC, 1f);
-                    if (val == -1)
+                    if (!flag)
                     {
                         // 文字を小さくする
                         p = ResizeFont(controlP, controlC, -1f);
                         break;
                     }
-                    val = 1;
                 }
             }
             controlC.Location = p + new Size(Margin.Left, Margin.Top);
@@ -502,7 +507,7 @@ namespace VoiceCountdown
         /// <param name="e"></param>
         private void AboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("VoiceCountdown\r\n\r\nVersion 20230603\r\nあみたろの声素材工房(https://amitaro.net/)の音声を使用しました");
+            MessageBox.Show("Voice Countdown -" + Text + "-\r\nVersion 20230927\r\n\r\n\r\nクレジット情報：\r\nあみたろの声素材工房(https://amitaro.net/)の音声を使用しました", "Voice Countdown のバージョン情報");
         }
 
         private void Button1_MouseEnter(object sender, EventArgs e) => Cursor = Cursors.Hand;
