@@ -2,14 +2,18 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationIcon>favicon.ico</ApplicationIcon>
+    <PackageReadmeFile></PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\Pause.svg" />
+    <None Remove="Resources\Play.svg" />
+    <None Remove="Resources\Stop.svg" />
     <None Remove="Resources\wav\10byoumae.wav" />
     <None Remove="Resources\wav\30byoumae.wav" />
     <None Remove="Resources\wav\num001_01.wav" />
@@ -31,48 +35,58 @@
 
   <ItemGroup>
     <PackageReference Include="NAudio" Version="2.1.0" />
+    <PackageReference Include="Svg" Version="3.4.4" />
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Resources\wav\10byoumae.wav">
+    <EmbeddedResource Include="Resources\Pause.svg">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\wav\30byoumae.wav">
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Play.svg">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\wav\num001_01.wav">
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Stop.svg">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\wav\num002_01.wav">
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\wav\10byoumae.wav">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\wav\num003_01.wav">
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\wav\30byoumae.wav">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\wav\num004_01.wav">
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\wav\num001_01.wav">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\wav\num005_01.wav">
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\wav\num002_01.wav">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\wav\timer_10punmae_01.wav">
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\wav\num003_01.wav">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\wav\timer_1punmae_01.wav">
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\wav\num004_01.wav">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\wav\timer_2funmae_01.wav">
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\wav\num005_01.wav">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\wav\timer_3punmae_01.wav">
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\wav\timer_10punmae_01.wav">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\wav\timer_4punmae_01.wav">
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\wav\timer_1punmae_01.wav">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\wav\timer_5funmae_01.wav">
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\wav\timer_2funmae_01.wav">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\wav\timer_3punmae_01.wav">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\wav\timer_4punmae_01.wav">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\wav\timer_5funmae_01.wav">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>

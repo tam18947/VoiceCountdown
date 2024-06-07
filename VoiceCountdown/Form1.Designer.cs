@@ -107,7 +107,7 @@
             splitContainer2.Panel2.Controls.Add(dateTimePicker1);
             splitContainer2.Panel2.Controls.Add(label3);
             splitContainer2.Size = new Size(100, 429);
-            splitContainer2.SplitterDistance = 283;
+            splitContainer2.SplitterDistance = 259;
             splitContainer2.SplitterWidth = 8;
             splitContainer2.TabIndex = 0;
             splitContainer2.TabStop = false;
@@ -120,7 +120,7 @@
             checkedListBox1.Items.AddRange(new object[] { "10分前", "5分前", "4分前", "3分前", "2分前", "1分前", "30秒前", "10秒前", "5", "4", "3", "2", "1" });
             checkedListBox1.Location = new Point(0, 15);
             checkedListBox1.Name = "checkedListBox1";
-            checkedListBox1.Size = new Size(100, 268);
+            checkedListBox1.Size = new Size(100, 244);
             checkedListBox1.TabIndex = 1;
             // 
             // label1
@@ -135,19 +135,19 @@
             // button1
             // 
             button1.BackColor = Color.Transparent;
-            button1.BackgroundImage = Properties.Resources.Play;
             button1.BackgroundImageLayout = ImageLayout.Zoom;
             button1.Dock = DockStyle.Fill;
             button1.FlatStyle = FlatStyle.Flat;
             button1.ForeColor = SystemColors.Control;
             button1.Location = new Point(0, 38);
             button1.Name = "button1";
-            button1.Size = new Size(100, 100);
+            button1.Size = new Size(100, 124);
             button1.TabIndex = 2;
             button1.UseVisualStyleBackColor = false;
-            button1.Click += Start_Click;
+            button1.Click += Button1_Click;
             button1.MouseEnter += Button1_MouseEnter;
             button1.MouseLeave += Button1_MouseLeave;
+            button1.Resize += Button1_Resize;
             // 
             // dateTimePicker1
             // 
@@ -200,7 +200,7 @@
             startToolStripMenuItem.Name = "startToolStripMenuItem";
             startToolStripMenuItem.Size = new Size(146, 22);
             startToolStripMenuItem.Text = "開始(&S)";
-            startToolStripMenuItem.Click += Start_Click;
+            startToolStripMenuItem.Click += Button1_Click;
             // 
             // stopToolStripMenuItem
             // 
@@ -298,7 +298,8 @@
             Controls.Add(statusStrip1);
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "Form1";
-            Text = "カウントダウンを読み上げます";
+            Text = "カウントダウン読み上げちゃん";
+            Load += Form1_Load;
             splitContainer1.Panel1.ResumeLayout(false);
             splitContainer1.Panel2.ResumeLayout(false);
             splitContainer1.Panel2.PerformLayout();
