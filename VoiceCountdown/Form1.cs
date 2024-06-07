@@ -20,8 +20,8 @@ namespace VoiceCountdown
         /// <summary>
         /// あみたろの声素材工房(https://amitaro.net/)の音声を使用しました
         /// </summary>
-        private readonly UnmanagedMemoryStream[] wavStream = new UnmanagedMemoryStream[]
-        {
+        private readonly UnmanagedMemoryStream[] wavStream =
+        [
             Resources.timer_10punmae_01,
             Resources.timer_5funmae_01,
             Resources.timer_4punmae_01,
@@ -35,27 +35,27 @@ namespace VoiceCountdown
             Resources.num003_01,
             Resources.num002_01,
             Resources.num001_01,
-        };
+        ];
 
         /// <summary>
         /// 音声の時間をTimeSpanで用意する
         /// </summary>
-        private readonly TimeSpan[] timeSpans = new TimeSpan[]
-        {
-            new TimeSpan(0, 10, 0),
-            new TimeSpan(0, 5, 0),
-            new TimeSpan(0, 4, 0),
-            new TimeSpan(0, 3, 0),
-            new TimeSpan(0, 2, 0),
-            new TimeSpan(0, 1, 0),
-            new TimeSpan(0, 0, 30),
-            new TimeSpan(0, 0, 10),
-            new TimeSpan(0, 0, 5),
-            new TimeSpan(0, 0, 4),
-            new TimeSpan(0, 0, 3),
-            new TimeSpan(0, 0, 2),
-            new TimeSpan(0, 0, 1),
-        };
+        private readonly TimeSpan[] timeSpans =
+        [
+            new(0, 10, 0),
+            new(0, 5, 0),
+            new(0, 4, 0),
+            new(0, 3, 0),
+            new(0, 2, 0),
+            new(0, 1, 0),
+            new(0, 0, 30),
+            new(0, 0, 10),
+            new(0, 0, 5),
+            new(0, 0, 4),
+            new(0, 0, 3),
+            new(0, 0, 2),
+            new(0, 0, 1),
+        ];
         /// <summary>
         /// Stopwatchオブジェクトを作成する
         /// </summary>
@@ -63,7 +63,7 @@ namespace VoiceCountdown
         /// <summary>
         /// チェックされた出力デバイスの番号を保持する変数
         /// </summary>
-        int checkedDeviceIndex = -1;
+        private int checkedDeviceIndex = -1;
         /// <summary>
         /// AudioPlayerの変数
         /// </summary>
@@ -92,6 +92,10 @@ namespace VoiceCountdown
         /// ボタンがダブルクリックされてからトリプルクリックされるまでの計測時間
         /// </summary>
         private int clickInterval = 0;
+        /// <summary>
+        /// 
+        /// </summary>
+        private Stream? stream1 = null;
 
         /// <summary>
         /// タイマーで時間が来たら音声を再生させるイベントハンドラ
@@ -123,40 +127,39 @@ namespace VoiceCountdown
                         if (checkedListBox1.GetItemChecked(j))
                         {
                             audioPlayer?.Stop();
-                            int ind = 0;
-                            if (checkedDeviceIndex == -1)
-                            {
-                                ind = -1;
-                            }
-                            else
-                            {
-                                var devices = AudioPlayer.GetDevices();
-                                for (int i = 0; i < devices.Count; i++)
-                                {
-                                    if (devices[i] == toolStripStatusLabel1.Text)
-                                    { break; }
-                                    else
-                                    { ind++; }
-                                }
-                                if (devices.Count == ind)
-                                {
-                                    ind = checkedDeviceIndex = -1;
-                                    toolStripStatusLabel1.Text = "既定のデバイス";
-                                }
-                            }
                             wavStream[j].Seek(0, SeekOrigin.Begin);
-                            audioPlayer = new AudioPlayer(wavStream[j], ind);
+                            audioPlayer = new AudioPlayer(wavStream[j], GetDeviceNumber());
                             audioPlayer.Play();
-                            break;
+                            return;
                         }
                     }
-                    else { break; }
+                    else { return; }
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Exception");
             }
+        }
+        /// <summary>
+        /// 音声デバイス番号を取得する
+        /// </summary>
+        /// <returns></returns>
+        private int GetDeviceNumber()
+        {
+            if (checkedDeviceIndex == -1) { return -1; }
+
+            var devices = AudioPlayer.GetDevices();
+            for (int i = 0; i < devices.Count; i++)
+            {
+                if (devices[i] == toolStripStatusLabel1.Text)
+                {
+                    return i;
+                }
+            }
+            toolStripStatusLabel1.Text = "既定のデバイス";
+            checkedDeviceIndex = -1;
+            return -1;
         }
 
         /// <summary>
@@ -245,7 +248,7 @@ namespace VoiceCountdown
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Start_Click(object sender, EventArgs e)
+        private void Button1_Click(object sender, EventArgs e)
         {
             if (selectToolStripMenuItem.Checked)
             {
@@ -320,12 +323,14 @@ namespace VoiceCountdown
                         if (timer1.Enabled)
                         {
                             // タイマーが開始していたら一時停止ボタンにする
-                            button1.BackgroundImage = Resources.Pause;
+                            stream1 = GetType().Assembly.GetManifestResourceStream("VoiceCountdown.Resources.Pause.svg");
+                            button1.BackgroundImage = Svg.GetImage(button1.Size, stream1);
                         }
                         else
                         {
                             // タイマーが停止していたら開始ボタンにする
-                            button1.BackgroundImage = Resources.Play;
+                            stream1 = GetType().Assembly.GetManifestResourceStream("VoiceCountdown.Resources.Play.svg");
+                            button1.BackgroundImage = Svg.GetImage(button1.Size, stream1);
                         }
                     }
                 };
@@ -337,7 +342,8 @@ namespace VoiceCountdown
                 {
                     clickCount = 0;
                     // トリプルクリックされたときの処理を記述
-                    button1.BackgroundImage = Resources.Play;
+                    stream1 = GetType().Assembly.GetManifestResourceStream("VoiceCountdown.Resources.Play.svg");
+                    button1.BackgroundImage = Svg.GetImage(button1.Size, stream1);
                     // オーディオを停止する
                     audioPlayer?.Stop();
                     // タイマーを停止する
@@ -360,7 +366,8 @@ namespace VoiceCountdown
                         timer1.Stop();
                         // ストップウォッチを止める
                         sw.Stop();
-                        button1.BackgroundImage = Resources.Play;
+                        stream1 = GetType().Assembly.GetManifestResourceStream("VoiceCountdown.Resources.Play.svg");
+                        button1.BackgroundImage = Svg.GetImage(button1.Size, stream1);
                         startToolStripMenuItem.Enabled = true;
                         startToolStripMenuItem.Text = "再開";
                     }
@@ -372,7 +379,8 @@ namespace VoiceCountdown
                         timer1.Start();
                         // ストップウォッチを開始する
                         sw.Start();
-                        button1.BackgroundImage = Resources.Pause;
+                        stream1 = GetType().Assembly.GetManifestResourceStream("VoiceCountdown.Resources.Pause.svg");
+                        button1.BackgroundImage = Svg.GetImage(button1.Size, stream1);
                         dateTimePicker1.Enabled = false;
                         stopToolStripMenuItem.Enabled = true;
                         startToolStripMenuItem.Text = "一時停止";
@@ -380,7 +388,8 @@ namespace VoiceCountdown
                     }
                     if (clickCount == 2)
                     {
-                        button1.BackgroundImage = Resources.Stop;
+                        stream1 = GetType().Assembly.GetManifestResourceStream("VoiceCountdown.Resources.Stop.svg");
+                        button1.BackgroundImage = Svg.GetImage(button1.Size, stream1);
                     }
                 }
             }
@@ -392,7 +401,8 @@ namespace VoiceCountdown
         {
             if (timer1.Enabled)
             {
-                button1.BackgroundImage = Resources.Play;
+                stream1 = GetType().Assembly.GetManifestResourceStream("VoiceCountdown.Resources.Play.svg");
+                button1.BackgroundImage = Svg.GetImage(button1.Size, stream1);
                 // オーディオを停止する
                 audioPlayer?.Stop();
                 // タイマーを停止する
@@ -413,7 +423,8 @@ namespace VoiceCountdown
                 timer1.Start();
                 // ストップウォッチを開始する
                 sw.Start();
-                button1.BackgroundImage = Resources.Stop;
+                stream1 = GetType().Assembly.GetManifestResourceStream("VoiceCountdown.Resources.Stop.svg");
+                button1.BackgroundImage = Svg.GetImage(button1.Size, stream1);
                 dateTimePicker1.Enabled = false;
                 startToolStripMenuItem.Enabled = false;
                 stopToolStripMenuItem.Enabled = true;
@@ -434,7 +445,8 @@ namespace VoiceCountdown
             {
                 foreach (ToolStripMenuItem item in toolStripDropDownButton1.DropDownItems)
                 {
-                    b = b && devices.Contains(item.Text);
+                    var txt = item.Text is null ? "" : item.Text;
+                    b = b && devices.Contains(txt);
                 }
             }
             else
@@ -507,11 +519,27 @@ namespace VoiceCountdown
         /// <param name="e"></param>
         private void AboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Voice Countdown -" + Text + "-\r\nVersion 20230927\r\n\r\n\r\nクレジット情報：\r\nあみたろの声素材工房(https://amitaro.net/)の音声を使用しました", "Voice Countdown のバージョン情報");
+            string version = "Version 20240608";
+            MessageBox.Show("Voice Countdown -" + Text + "-\r\n" + version
+                + "\r\n\r\n\r\nクレジット情報：\r\nあみたろの声素材工房(https://amitaro.net/)の音声を使用しました", "Voice Countdown のバージョン情報");
         }
 
         private void Button1_MouseEnter(object sender, EventArgs e) => Cursor = Cursors.Hand;
 
         private void Button1_MouseLeave(object sender, EventArgs e) => Cursor = Cursors.Default;
+
+        private void Button1_Resize(object sender, EventArgs e)
+        {
+            if (stream1 is not null)
+            {
+                stream1.Seek(0, SeekOrigin.Begin);
+                button1.BackgroundImage = Svg.GetImage(button1.Size, stream1);
+            }
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            stream1 = GetType().Assembly.GetManifestResourceStream("VoiceCountdown.Resources.Play.svg");
+        }
     }
 }
