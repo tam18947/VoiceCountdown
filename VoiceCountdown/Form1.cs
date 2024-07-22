@@ -93,7 +93,7 @@ namespace VoiceCountdown
         /// </summary>
         private int clickInterval = 0;
         /// <summary>
-        /// 
+        /// 表示中のボタンアイコンのストリーム
         /// </summary>
         private Stream? stream1 = null;
 
@@ -114,7 +114,7 @@ namespace VoiceCountdown
                 {
                     Reset_Click();
                 }
-                label2.Text = ts.ToString(@"mm\:ss");
+                label2.Text = ts.Hours > 0 ? ts.ToString(@"h\:mm\:ss") : ts.ToString(@"mm\:ss");
                 for (int j = current; j < checkedListBox1.Items.Count; j++)
                 {
                     if (timeSpans[j] > ts)
@@ -189,6 +189,12 @@ namespace VoiceCountdown
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void SplitContainer1_Panel2_SizeChanged(object sender, EventArgs e) => ControlSizeChange((SplitterPanel)sender, label2);
+        /// <summary>
+        /// labelのレイアウト変更で時間表示の文字サイズを変更するイベントハンドラ
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Label2_Layout(object sender, LayoutEventArgs e) => ControlSizeChange(splitContainer1.Panel2, (Label)sender);
         /// <summary>
         /// labelのコントロールサイズを基にしてフォントサイズを自動調節する
         /// </summary>
@@ -351,7 +357,7 @@ namespace VoiceCountdown
                     // ストップウォッチをリセットする
                     sw.Reset();
                     label2.Text = "00:00";
-                    dateTimePicker1.Enabled = true;
+                    panel1.Enabled = true;
                     stopToolStripMenuItem.Enabled = false;
                     startToolStripMenuItem.Text = "開始";
                     selectToolStripMenuItem.Enabled = true;
@@ -375,13 +381,19 @@ namespace VoiceCountdown
                     {
                         current = 0;
                         timeSpan = dateTimePicker1.Value - baseDate;
+                        // 時刻で指定
+                        if (radioButtonAlarm.Checked)
+                        {
+                            timeSpan -= DateTime.Now - DateTime.Today;
+                            timeSpan = timeSpan > TimeSpan.Zero ? timeSpan : timeSpan + TimeSpan.FromDays(1);
+                        }
                         // タイマーを開始する
                         timer1.Start();
                         // ストップウォッチを開始する
                         sw.Start();
                         stream1 = GetType().Assembly.GetManifestResourceStream("VoiceCountdown.Resources.Pause.svg");
                         button1.BackgroundImage = Svg.GetImage(button1.Size, stream1);
-                        dateTimePicker1.Enabled = false;
+                        panel1.Enabled = false;
                         stopToolStripMenuItem.Enabled = true;
                         startToolStripMenuItem.Text = "一時停止";
                         selectToolStripMenuItem.Enabled = false;
@@ -410,7 +422,7 @@ namespace VoiceCountdown
                 // ストップウォッチをリセットする
                 sw.Reset();
                 label2.Text = "00:00";
-                dateTimePicker1.Enabled = true;
+                panel1.Enabled = true;
                 startToolStripMenuItem.Enabled = true;
                 stopToolStripMenuItem.Enabled = false;
                 selectToolStripMenuItem.Enabled = true;
@@ -419,13 +431,19 @@ namespace VoiceCountdown
             {
                 current = 0;
                 timeSpan = dateTimePicker1.Value - baseDate;
+                // 時刻で指定
+                if (radioButtonAlarm.Checked)
+                {
+                    timeSpan -= DateTime.Now - DateTime.Today;
+                    timeSpan = timeSpan > TimeSpan.Zero ? timeSpan : timeSpan + TimeSpan.FromDays(1);
+                }
                 // タイマーを開始する
                 timer1.Start();
                 // ストップウォッチを開始する
                 sw.Start();
                 stream1 = GetType().Assembly.GetManifestResourceStream("VoiceCountdown.Resources.Stop.svg");
                 button1.BackgroundImage = Svg.GetImage(button1.Size, stream1);
-                dateTimePicker1.Enabled = false;
+                panel1.Enabled = false;
                 startToolStripMenuItem.Enabled = false;
                 stopToolStripMenuItem.Enabled = true;
                 selectToolStripMenuItem.Enabled = false;
@@ -519,7 +537,7 @@ namespace VoiceCountdown
         /// <param name="e"></param>
         private void AboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            string version = "Version 20240608";
+            string version = "Version 20240722";
             MessageBox.Show("Voice Countdown -" + Text + "-\r\n" + version
                 + "\r\n\r\n\r\nクレジット情報：\r\nあみたろの声素材工房(https://amitaro.net/)の音声を使用しました", "Voice Countdown のバージョン情報");
         }
@@ -530,16 +548,13 @@ namespace VoiceCountdown
 
         private void Button1_Resize(object sender, EventArgs e)
         {
-            if (stream1 is not null)
-            {
-                stream1.Seek(0, SeekOrigin.Begin);
-                button1.BackgroundImage = Svg.GetImage(button1.Size, stream1);
-            }
+            button1.BackgroundImage = Svg.GetImage(button1.Size, stream1);
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
             stream1 = GetType().Assembly.GetManifestResourceStream("VoiceCountdown.Resources.Play.svg");
+            button1.BackgroundImage = Svg.GetImage(button1.Size, stream1);
         }
     }
 }

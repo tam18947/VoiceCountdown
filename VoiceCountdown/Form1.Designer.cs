@@ -35,7 +35,10 @@
             checkedListBox1 = new CheckedListBox();
             label1 = new Label();
             button1 = new Button();
+            panel1 = new Panel();
             dateTimePicker1 = new DateTimePicker();
+            radioButtonAlarm = new RadioButton();
+            radioButtonDuration = new RadioButton();
             label3 = new Label();
             label2 = new Label();
             menuStrip1 = new MenuStrip();
@@ -54,6 +57,7 @@
             toolStripStatusLabel1 = new ToolStripStatusLabel();
             timer1 = new System.Windows.Forms.Timer(components);
             fontDialog1 = new FontDialog();
+            toolTip1 = new ToolTip(components);
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
@@ -62,6 +66,7 @@
             splitContainer2.Panel1.SuspendLayout();
             splitContainer2.Panel2.SuspendLayout();
             splitContainer2.SuspendLayout();
+            panel1.SuspendLayout();
             menuStrip1.SuspendLayout();
             statusStrip1.SuspendLayout();
             SuspendLayout();
@@ -104,11 +109,9 @@
             // splitContainer2.Panel2
             // 
             splitContainer2.Panel2.Controls.Add(button1);
-            splitContainer2.Panel2.Controls.Add(dateTimePicker1);
-            splitContainer2.Panel2.Controls.Add(label3);
+            splitContainer2.Panel2.Controls.Add(panel1);
             splitContainer2.Size = new Size(100, 429);
-            splitContainer2.SplitterDistance = 259;
-            splitContainer2.SplitterWidth = 8;
+            splitContainer2.SplitterDistance = 256;
             splitContainer2.TabIndex = 0;
             splitContainer2.TabStop = false;
             // 
@@ -120,7 +123,7 @@
             checkedListBox1.Items.AddRange(new object[] { "10分前", "5分前", "4分前", "3分前", "2分前", "1分前", "30秒前", "10秒前", "5", "4", "3", "2", "1" });
             checkedListBox1.Location = new Point(0, 15);
             checkedListBox1.Name = "checkedListBox1";
-            checkedListBox1.Size = new Size(100, 244);
+            checkedListBox1.Size = new Size(100, 241);
             checkedListBox1.TabIndex = 1;
             // 
             // label1
@@ -139,26 +142,66 @@
             button1.Dock = DockStyle.Fill;
             button1.FlatStyle = FlatStyle.Flat;
             button1.ForeColor = SystemColors.Control;
-            button1.Location = new Point(0, 38);
+            button1.Location = new Point(0, 76);
             button1.Name = "button1";
-            button1.Size = new Size(100, 124);
-            button1.TabIndex = 2;
+            button1.Size = new Size(100, 93);
+            button1.TabIndex = 3;
             button1.UseVisualStyleBackColor = false;
             button1.Click += Button1_Click;
             button1.MouseEnter += Button1_MouseEnter;
             button1.MouseLeave += Button1_MouseLeave;
             button1.Resize += Button1_Resize;
             // 
+            // panel1
+            // 
+            panel1.AutoSize = true;
+            panel1.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            panel1.Controls.Add(dateTimePicker1);
+            panel1.Controls.Add(radioButtonAlarm);
+            panel1.Controls.Add(radioButtonDuration);
+            panel1.Controls.Add(label3);
+            panel1.Dock = DockStyle.Top;
+            panel1.Location = new Point(0, 0);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(100, 76);
+            panel1.TabIndex = 4;
+            // 
             // dateTimePicker1
             // 
             dateTimePicker1.Dock = DockStyle.Top;
             dateTimePicker1.Format = DateTimePickerFormat.Time;
-            dateTimePicker1.Location = new Point(0, 15);
+            dateTimePicker1.Location = new Point(0, 53);
             dateTimePicker1.Name = "dateTimePicker1";
             dateTimePicker1.ShowUpDown = true;
             dateTimePicker1.Size = new Size(100, 23);
-            dateTimePicker1.TabIndex = 1;
+            dateTimePicker1.TabIndex = 5;
             dateTimePicker1.Value = new DateTime(2000, 1, 1, 0, 5, 0, 0);
+            // 
+            // radioButtonAlarm
+            // 
+            radioButtonAlarm.AutoSize = true;
+            radioButtonAlarm.Dock = DockStyle.Top;
+            radioButtonAlarm.Location = new Point(0, 34);
+            radioButtonAlarm.Name = "radioButtonAlarm";
+            radioButtonAlarm.Size = new Size(100, 19);
+            radioButtonAlarm.TabIndex = 3;
+            radioButtonAlarm.Text = "時刻で設定";
+            toolTip1.SetToolTip(radioButtonAlarm, "ユーザーが指定した時刻（例：15時など）を設定できる");
+            radioButtonAlarm.UseVisualStyleBackColor = true;
+            // 
+            // radioButtonDuration
+            // 
+            radioButtonDuration.AutoSize = true;
+            radioButtonDuration.Checked = true;
+            radioButtonDuration.Dock = DockStyle.Top;
+            radioButtonDuration.Location = new Point(0, 15);
+            radioButtonDuration.Name = "radioButtonDuration";
+            radioButtonDuration.Size = new Size(100, 19);
+            radioButtonDuration.TabIndex = 2;
+            radioButtonDuration.TabStop = true;
+            radioButtonDuration.Text = "期間で設定";
+            toolTip1.SetToolTip(radioButtonDuration, "ユーザーが指定した時間（例：5分、30秒など）を設定できる");
+            radioButtonDuration.UseVisualStyleBackColor = true;
             // 
             // label3
             // 
@@ -166,8 +209,8 @@
             label3.Location = new Point(0, 0);
             label3.Name = "label3";
             label3.Size = new Size(100, 15);
-            label3.TabIndex = 0;
-            label3.Text = "タイマー開始時間";
+            label3.TabIndex = 4;
+            label3.Text = "タイマーの時間";
             // 
             // label2
             // 
@@ -178,6 +221,7 @@
             label2.TabIndex = 0;
             label2.Text = "00:00";
             label2.TextAlign = ContentAlignment.MiddleCenter;
+            label2.Layout += Label2_Layout;
             // 
             // menuStrip1
             // 
@@ -307,8 +351,11 @@
             splitContainer1.ResumeLayout(false);
             splitContainer2.Panel1.ResumeLayout(false);
             splitContainer2.Panel2.ResumeLayout(false);
+            splitContainer2.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer2).EndInit();
             splitContainer2.ResumeLayout(false);
+            panel1.ResumeLayout(false);
+            panel1.PerformLayout();
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
             statusStrip1.ResumeLayout(false);
@@ -335,13 +382,17 @@
         private ToolStripDropDownButton toolStripDropDownButton1;
         private ToolStripStatusLabel toolStripStatusLabel1;
         private System.Windows.Forms.Timer timer1;
-        private DateTimePicker dateTimePicker1;
         private Button button1;
         private ToolStripMenuItem fontToolStripMenuItem;
         private FontDialog fontDialog1;
         private ToolStripSeparator toolStripSeparator1;
         private ToolStripMenuItem selectToolStripMenuItem;
-        private Label label3;
         private SplitContainer splitContainer2;
+        private Panel panel1;
+        private DateTimePicker dateTimePicker1;
+        private Label label3;
+        private RadioButton radioButtonAlarm;
+        private RadioButton radioButtonDuration;
+        private ToolTip toolTip1;
     }
 }
