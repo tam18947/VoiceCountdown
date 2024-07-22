@@ -93,7 +93,7 @@ namespace VoiceCountdown
         /// </summary>
         private int clickInterval = 0;
         /// <summary>
-        /// 
+        /// 表示中のボタンアイコンのストリーム
         /// </summary>
         private Stream? stream1 = null;
 
@@ -382,7 +382,7 @@ namespace VoiceCountdown
                         current = 0;
                         timeSpan = dateTimePicker1.Value - baseDate;
                         // 時刻で指定
-                        if (checkBox1.Checked)
+                        if (radioButtonAlarm.Checked)
                         {
                             timeSpan -= DateTime.Now - DateTime.Today;
                             timeSpan = timeSpan > TimeSpan.Zero ? timeSpan : timeSpan + TimeSpan.FromDays(1);
@@ -432,7 +432,7 @@ namespace VoiceCountdown
                 current = 0;
                 timeSpan = dateTimePicker1.Value - baseDate;
                 // 時刻で指定
-                if (checkBox1.Checked)
+                if (radioButtonAlarm.Checked)
                 {
                     timeSpan -= DateTime.Now - DateTime.Today;
                     timeSpan = timeSpan > TimeSpan.Zero ? timeSpan : timeSpan + TimeSpan.FromDays(1);
@@ -537,7 +537,7 @@ namespace VoiceCountdown
         /// <param name="e"></param>
         private void AboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            string version = "Version 20240608";
+            string version = "Version 20240722";
             MessageBox.Show("Voice Countdown -" + Text + "-\r\n" + version
                 + "\r\n\r\n\r\nクレジット情報：\r\nあみたろの声素材工房(https://amitaro.net/)の音声を使用しました", "Voice Countdown のバージョン情報");
         }
@@ -548,21 +548,13 @@ namespace VoiceCountdown
 
         private void Button1_Resize(object sender, EventArgs e)
         {
-            if (stream1 is not null)
-            {
-                stream1.Seek(0, SeekOrigin.Begin);
-                button1.BackgroundImage = Svg.GetImage(button1.Size, stream1);
-            }
+            button1.BackgroundImage = Svg.GetImage(button1.Size, stream1);
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
             stream1 = GetType().Assembly.GetManifestResourceStream("VoiceCountdown.Resources.Play.svg");
-        }
-
-        private void CheckBox1_CheckedChanged(object sender, EventArgs e)
-        {
-            label3.Text = checkBox1.Checked ? "タイマー設定時刻" : "タイマー設定時間";
+            button1.BackgroundImage = Svg.GetImage(button1.Size, stream1);
         }
     }
 }

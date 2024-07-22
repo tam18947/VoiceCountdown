@@ -1,4 +1,5 @@
 ﻿using Svg;
+using System.IO;
 
 namespace VoiceCountdown
 {
@@ -9,6 +10,8 @@ namespace VoiceCountdown
             if (size.Width <= 0) { return null; }
             if (size.Height <= 0) { return null; }
             if (stream is null) { return null; }
+            // ストリームを最初の位置に移動
+            stream.Seek(0, SeekOrigin.Begin);
 
             Bitmap bmp = new(size.Width, size.Height);
 
