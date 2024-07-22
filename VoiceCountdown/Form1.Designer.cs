@@ -35,6 +35,7 @@
             checkedListBox1 = new CheckedListBox();
             label1 = new Label();
             button1 = new Button();
+            checkBox1 = new CheckBox();
             dateTimePicker1 = new DateTimePicker();
             label3 = new Label();
             label2 = new Label();
@@ -104,10 +105,11 @@
             // splitContainer2.Panel2
             // 
             splitContainer2.Panel2.Controls.Add(button1);
+            splitContainer2.Panel2.Controls.Add(checkBox1);
             splitContainer2.Panel2.Controls.Add(dateTimePicker1);
             splitContainer2.Panel2.Controls.Add(label3);
             splitContainer2.Size = new Size(100, 429);
-            splitContainer2.SplitterDistance = 259;
+            splitContainer2.SplitterDistance = 251;
             splitContainer2.SplitterWidth = 8;
             splitContainer2.TabIndex = 0;
             splitContainer2.TabStop = false;
@@ -120,7 +122,7 @@
             checkedListBox1.Items.AddRange(new object[] { "10分前", "5分前", "4分前", "3分前", "2分前", "1分前", "30秒前", "10秒前", "5", "4", "3", "2", "1" });
             checkedListBox1.Location = new Point(0, 15);
             checkedListBox1.Name = "checkedListBox1";
-            checkedListBox1.Size = new Size(100, 244);
+            checkedListBox1.Size = new Size(100, 236);
             checkedListBox1.TabIndex = 1;
             // 
             // label1
@@ -139,15 +141,26 @@
             button1.Dock = DockStyle.Fill;
             button1.FlatStyle = FlatStyle.Flat;
             button1.ForeColor = SystemColors.Control;
-            button1.Location = new Point(0, 38);
+            button1.Location = new Point(0, 57);
             button1.Name = "button1";
-            button1.Size = new Size(100, 124);
+            button1.Size = new Size(100, 113);
             button1.TabIndex = 2;
             button1.UseVisualStyleBackColor = false;
             button1.Click += Button1_Click;
             button1.MouseEnter += Button1_MouseEnter;
             button1.MouseLeave += Button1_MouseLeave;
             button1.Resize += Button1_Resize;
+            // 
+            // checkBox1
+            // 
+            checkBox1.AutoSize = true;
+            checkBox1.Dock = DockStyle.Top;
+            checkBox1.Location = new Point(0, 38);
+            checkBox1.Name = "checkBox1";
+            checkBox1.Size = new Size(100, 19);
+            checkBox1.TabIndex = 3;
+            checkBox1.Text = "時刻で指定";
+            checkBox1.UseVisualStyleBackColor = true;
             // 
             // dateTimePicker1
             // 
@@ -178,6 +191,7 @@
             label2.TabIndex = 0;
             label2.Text = "00:00";
             label2.TextAlign = ContentAlignment.MiddleCenter;
+            label2.TextChanged += Label2_TextChanged;
             // 
             // menuStrip1
             // 
@@ -307,6 +321,7 @@
             splitContainer1.ResumeLayout(false);
             splitContainer2.Panel1.ResumeLayout(false);
             splitContainer2.Panel2.ResumeLayout(false);
+            splitContainer2.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer2).EndInit();
             splitContainer2.ResumeLayout(false);
             menuStrip1.ResumeLayout(false);
@@ -343,5 +358,6 @@
         private ToolStripMenuItem selectToolStripMenuItem;
         private Label label3;
         private SplitContainer splitContainer2;
+        private CheckBox checkBox1;
     }
 }
