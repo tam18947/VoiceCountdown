@@ -190,11 +190,11 @@ namespace VoiceCountdown
         /// <param name="e"></param>
         private void SplitContainer1_Panel2_SizeChanged(object sender, EventArgs e) => ControlSizeChange((SplitterPanel)sender, label2);
         /// <summary>
-        /// 
+        /// labelのレイアウト変更で時間表示の文字サイズを変更するイベントハンドラ
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Label2_TextChanged(object sender, EventArgs e) => ControlSizeChange(splitContainer1.Panel2, label2);
+        private void Label2_Layout(object sender, LayoutEventArgs e) => ControlSizeChange(splitContainer1.Panel2, (Label)sender);
         /// <summary>
         /// labelのコントロールサイズを基にしてフォントサイズを自動調節する
         /// </summary>
@@ -357,8 +357,7 @@ namespace VoiceCountdown
                     // ストップウォッチをリセットする
                     sw.Reset();
                     label2.Text = "00:00";
-                    dateTimePicker1.Enabled = true;
-                    checkBox1.Enabled = true;
+                    panel1.Enabled = true;
                     stopToolStripMenuItem.Enabled = false;
                     startToolStripMenuItem.Text = "開始";
                     selectToolStripMenuItem.Enabled = true;
@@ -394,8 +393,7 @@ namespace VoiceCountdown
                         sw.Start();
                         stream1 = GetType().Assembly.GetManifestResourceStream("VoiceCountdown.Resources.Pause.svg");
                         button1.BackgroundImage = Svg.GetImage(button1.Size, stream1);
-                        dateTimePicker1.Enabled = false;
-                        checkBox1.Enabled = false;
+                        panel1.Enabled = false;
                         stopToolStripMenuItem.Enabled = true;
                         startToolStripMenuItem.Text = "一時停止";
                         selectToolStripMenuItem.Enabled = false;
@@ -424,8 +422,7 @@ namespace VoiceCountdown
                 // ストップウォッチをリセットする
                 sw.Reset();
                 label2.Text = "00:00";
-                dateTimePicker1.Enabled = true;
-                checkBox1.Enabled = true;
+                panel1.Enabled = true;
                 startToolStripMenuItem.Enabled = true;
                 stopToolStripMenuItem.Enabled = false;
                 selectToolStripMenuItem.Enabled = true;
@@ -446,8 +443,7 @@ namespace VoiceCountdown
                 sw.Start();
                 stream1 = GetType().Assembly.GetManifestResourceStream("VoiceCountdown.Resources.Stop.svg");
                 button1.BackgroundImage = Svg.GetImage(button1.Size, stream1);
-                dateTimePicker1.Enabled = false;
-                checkBox1.Enabled = false;
+                panel1.Enabled = false;
                 startToolStripMenuItem.Enabled = false;
                 stopToolStripMenuItem.Enabled = true;
                 selectToolStripMenuItem.Enabled = false;
@@ -562,6 +558,11 @@ namespace VoiceCountdown
         private void Form1_Load(object sender, EventArgs e)
         {
             stream1 = GetType().Assembly.GetManifestResourceStream("VoiceCountdown.Resources.Play.svg");
+        }
+
+        private void CheckBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            label3.Text = checkBox1.Checked ? "タイマー設定時刻" : "タイマー設定時間";
         }
     }
 }
