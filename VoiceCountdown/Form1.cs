@@ -385,6 +385,7 @@ namespace VoiceCountdown
                         if (radioButtonAlarm.Checked)
                         {
                             timeSpan -= DateTime.Now - DateTime.Today;
+                            timeSpan = new TimeSpan(timeSpan.Hours, timeSpan.Minutes, timeSpan.Seconds);
                             timeSpan = timeSpan > TimeSpan.Zero ? timeSpan : timeSpan + TimeSpan.FromDays(1);
                         }
                         // タイマーを開始する
@@ -435,6 +436,7 @@ namespace VoiceCountdown
                 if (radioButtonAlarm.Checked)
                 {
                     timeSpan -= DateTime.Now - DateTime.Today;
+                    timeSpan = new TimeSpan(timeSpan.Hours, timeSpan.Minutes, timeSpan.Seconds);
                     timeSpan = timeSpan > TimeSpan.Zero ? timeSpan : timeSpan + TimeSpan.FromDays(1);
                 }
                 // タイマーを開始する
@@ -537,7 +539,7 @@ namespace VoiceCountdown
         /// <param name="e"></param>
         private void AboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            string version = "Version 20240722";
+            string version = "Version 20240803";
             MessageBox.Show("Voice Countdown -" + Text + "-\r\n" + version
                 + "\r\n\r\n\r\nクレジット情報：\r\nあみたろの声素材工房(https://amitaro.net/)の音声を使用しました", "Voice Countdown のバージョン情報");
         }
