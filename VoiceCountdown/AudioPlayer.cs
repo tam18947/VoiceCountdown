@@ -1,62 +1,61 @@
 ﻿using NAudio.Wave;
 
-namespace VoiceCountdown
+namespace VoiceCountdown;
+
+internal class AudioPlayer
 {
-    internal class AudioPlayer
+    internal AudioPlayer(Stream audioStream, int deviceNumber, int volume = 100)
     {
-        internal AudioPlayer(Stream audioStream, int deviceNumber, int volume = 100)
+        if (audioStream.Position > 0)
         {
-            if (audioStream.Position > 0)
+            return;
+        }
+        waveReader = new WaveFileReader(audioStream);
+        if (waveReader != null)
+        {
+            waveOutEvent = new WaveOutEvent
             {
-                return;
-            }
-            waveReader = new WaveFileReader(audioStream);
-            if (waveReader != null)
-            {
-                waveOutEvent = new WaveOutEvent
-                {
-                    DeviceNumber = deviceNumber
-                };
-                waveOutEvent.Init(waveReader);
-                waveOutEvent.Volume = volume > 100 ? 1 : volume * 0.01f;
-            }
+                DeviceNumber = deviceNumber
+            };
+            waveOutEvent.Init(waveReader);
+            waveOutEvent.Volume = volume > 100 ? 1 : volume * 0.01f;
+        }
+    }
+
+    private readonly WaveOutEvent? waveOutEvent = null;
+    private readonly WaveFileReader? waveReader = null;
+
+    public void Play()
+    {
+        if (waveOutEvent is null)
+        {
+            return;
         }
 
-        private readonly WaveOutEvent? waveOutEvent = null;
-        private readonly WaveFileReader? waveReader = null;
-
-        public void Play()
+        if (waveOutEvent.PlaybackState != PlaybackState.Playing)
         {
-            if (waveOutEvent is null)
-            {
-                return;
-            }
-
-            if (waveOutEvent.PlaybackState != PlaybackState.Playing)
-            {
-                waveOutEvent.Play();
-            }
+            waveOutEvent.Play();
         }
-        public void Stop()
+    }
+    public void Stop()
+    {
+        if (waveOutEvent is not null &&
+            waveOutEvent.PlaybackState != PlaybackState.Stopped)
         {
-            if (waveOutEvent is not null &&
-                waveOutEvent.PlaybackState != PlaybackState.Stopped)
-            {
-                waveOutEvent.Stop();
-            }
-            waveReader?.Dispose();
-            waveOutEvent?.Dispose();
+            waveOutEvent.Stop();
         }
+        waveReader?.Dispose();
+        waveOutEvent?.Dispose();
+    }
 
-        public static List<string> GetDevices()
+    public static List<string> GetDevices()
+    {
+        List<string> deviceList = [];
+        for (int i = 0; i < WaveOut.DeviceCount; i++)
         {
-            List<string> deviceList = new();
-            for (int i = 0; i < WaveOut.DeviceCount; i++)
-            {
-                var capabilities = WaveOut.GetCapabilities(i);
-                deviceList.Add(capabilities.ProductName);
-            }
-            return deviceList;
+            var capabilities = WaveOut.GetCapabilities(i);
+            deviceList.Add(capabilities.ProductName);
         }
+        return deviceList;
     }
 }
