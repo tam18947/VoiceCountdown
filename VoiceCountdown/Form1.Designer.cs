@@ -221,7 +221,6 @@ partial class Form1
         label2.TabIndex = 0;
         label2.Text = "00:00";
         label2.TextAlign = ContentAlignment.MiddleCenter;
-        label2.Layout += Label2_Layout;
         // 
         // menuStrip1
         // 
@@ -315,7 +314,7 @@ partial class Form1
         toolStripDropDownButton1.Size = new Size(81, 20);
         toolStripDropDownButton1.Tag = "";
         toolStripDropDownButton1.Text = "出力デバイス";
-        toolStripDropDownButton1.Click += ToolStripDropDownButton1_Click;
+        toolStripDropDownButton1.DropDownOpening += ToolStripDropDownButton1_DropDownOpening;
         // 
         // toolStripStatusLabel1
         // 

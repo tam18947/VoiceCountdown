@@ -1,561 +1,415 @@
-﻿using VoiceCountdown.Properties;
-using System.Diagnostics;
+﻿using VoiceCountdown.Core.Countdown;
+using VoiceCountdown.Properties;
 
 namespace VoiceCountdown;
 
 public partial class Form1 : Form
 {
+    private const string DefaultDeviceLabel = "既定のデバイス";
+
+    private readonly IReadOnlyList<CountdownItem> items = CountdownConfig.DefaultItems;
+    private readonly CountdownService countdown;
+    private readonly AudioPlayer audio = new();
+
+    /// <summary>選択中の出力デバイス名。null は既定のデバイス。</summary>
+    private string? selectedDeviceName;
+
+    // 一時停止機能が有効なときの連続クリック判定（3 回目のクリックでリセット）
+    private readonly System.Windows.Forms.Timer resetArmTimer = new();
+    private long lastClickTime;
+    private int rapidClickCount;
+
+    private ButtonIcon currentIcon = ButtonIcon.Play;
+
+    // 残り時間ラベルのフォント（自分で作ったものだけ破棄する）
+    private Font? ownedTimeFont;
+    private string lastFittedText = "";
+
+    private bool PauseEnabled => selectToolStripMenuItem.Checked;
+
     public Form1()
     {
         InitializeComponent();
-        for (int i = 0; i < checkedListBox1.Items.Count - 2; i++)
-        {
-            checkedListBox1.SetItemChecked(i, true);
-        }
-        ToolStripDropDownButton1_Click();
-        initialized = true;
-        ControlSizeChange(splitContainer1.Panel2, label2);
+
+        countdown = new CountdownService(items.Select(i => i.TriggerTime));
+
+        InitTriggerList();
+        InitDeviceMenu();
+        InitCountdownEvents();
+
+        resetArmTimer.Interval = SystemInformation.DoubleClickTime;
+        resetArmTimer.Tick += ResetArmTimer_Tick;
+
+        FormClosed += (_, _) => DisposeResources();
+
+        ApplyState(CountdownState.Idle);
+        FitTimeLabel();
     }
 
-    /// <summary>
-    /// あみたろの声素材工房(https://amitaro.net/)の音声を使用しました
-    /// </summary>
-    private readonly UnmanagedMemoryStream[] wavStream =
-    [
-        Resources.timer_10punmae_01,
-        Resources.timer_5funmae_01,
-        Resources.timer_4punmae_01,
-        Resources.timer_3punmae_01,
-        Resources.timer_2funmae_01,
-        Resources.timer_1punmae_01,
-        Resources._30byoumae,
-        Resources._10byoumae,
-        Resources.num005_01,
-        Resources.num004_01,
-        Resources.num003_01,
-        Resources.num002_01,
-        Resources.num001_01,
-    ];
+    // -----------------------------
+    // 初期化
+    // -----------------------------
 
-    /// <summary>
-    /// 音声の時間をTimeSpanで用意する
-    /// </summary>
-    private readonly TimeSpan[] timeSpans =
-    [
-        new(0, 10, 0),
-        new(0, 5, 0),
-        new(0, 4, 0),
-        new(0, 3, 0),
-        new(0, 2, 0),
-        new(0, 1, 0),
-        new(0, 0, 30),
-        new(0, 0, 10),
-        new(0, 0, 5),
-        new(0, 0, 4),
-        new(0, 0, 3),
-        new(0, 0, 2),
-        new(0, 0, 1),
-    ];
-    /// <summary>
-    /// Stopwatchオブジェクトを作成する
-    /// </summary>
-    private readonly Stopwatch sw = new();
-    /// <summary>
-    /// チェックされた出力デバイスの番号を保持する変数
-    /// </summary>
-    private int checkedDeviceIndex = -1;
-    /// <summary>
-    /// AudioPlayerの変数
-    /// </summary>
-    private AudioPlayer? audioPlayer = null;
-    /// <summary>
-    /// ベースの時間の設定
-    /// </summary>
-    private readonly DateTime baseDate = new(2000, 1, 1, 0, 0, 0);
-    /// <summary>
-    /// 開始する時間を保持する変数
-    /// </summary>
-    private TimeSpan timeSpan = TimeSpan.Zero;
-    /// <summary>
-    /// 現在の timeSpans の配列番号
-    /// </summary>
-    private int current = 0;
-    /// <summary>
-    /// 初期化が終了したかどうか
-    /// </summary>
-    private readonly bool initialized = false;
-    /// <summary>
-    /// ボタンのクリックカウント
-    /// </summary>
-    private int clickCount = 0;
-    /// <summary>
-    /// ボタンがダブルクリックされてからトリプルクリックされるまでの計測時間
-    /// </summary>
-    private int clickInterval = 0;
-    /// <summary>
-    /// 表示中のボタンアイコンのストリーム
-    /// </summary>
-    private Stream? stream1 = null;
-
-    /// <summary>
-    /// タイマーで時間が来たら音声を再生させるイベントハンドラ
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private void Timer1_Tick(object sender, EventArgs e)
+    private void InitTriggerList()
     {
-        try
+        checkedListBox1.Items.Clear();
+        foreach (var item in items)
+            checkedListBox1.Items.Add(item.Label, item.EnabledByDefault);
+    }
+
+    private void InitCountdownEvents()
+    {
+        countdown.TimeUpdated += remaining => SetTimeText(CountdownService.Format(remaining));
+
+        countdown.Triggered += index =>
         {
-            var h = sw.Elapsed.Hours;
-            var m = sw.Elapsed.Minutes;
-            var s = sw.Elapsed.Seconds;
-            var ts = timeSpan - new TimeSpan(h, m, s);
-            if (ts.TotalSeconds <= 0)
-            {
-                Reset_Click();
-            }
-            label2.Text = ts.Hours > 0 ? ts.ToString(@"h\:mm\:ss") : ts.ToString(@"mm\:ss");
-            for (int j = current; j < checkedListBox1.Items.Count; j++)
-            {
-                if (timeSpans[j] > ts)
-                {
-                    current++;
-                }
-                else if (timeSpans[j] == ts)
-                {
-                    checkedListBox1.SelectedIndex = current++;
-                    if (checkedListBox1.GetItemChecked(j))
-                    {
-                        audioPlayer?.Stop();
-                        wavStream[j].Seek(0, SeekOrigin.Begin);
-                        audioPlayer = new AudioPlayer(wavStream[j], GetDeviceNumber());
-                        audioPlayer.Play();
-                        return;
-                    }
-                }
-                else { return; }
-            }
-        }
-        catch (Exception ex)
+            // 通過した項目を一覧で選択状態にする
+            checkedListBox1.SelectedIndex = index;
+
+            if (checkedListBox1.GetItemChecked(index))
+                PlaySound(items[index].SoundKey);
+        };
+
+        countdown.StateChanged += ApplyState;
+    }
+
+    // -----------------------------
+    // カウントダウン操作
+    // -----------------------------
+
+    private void StartCountdown()
+    {
+        var duration = radioButtonAlarm.Checked
+            ? CountdownService.DurationUntil(dateTimePicker1.Value.TimeOfDay, DateTime.Now)
+            : dateTimePicker1.Value.TimeOfDay;
+
+        if (duration <= TimeSpan.Zero) return;
+
+        countdown.Start(duration);
+    }
+
+    /// <summary>停止中なら開始、実行中なら一時停止、一時停止中なら再開する。</summary>
+    private void TogglePause()
+    {
+        switch (countdown.State)
         {
-            MessageBox.Show(ex.Message, "Exception");
+            case CountdownState.Idle: StartCountdown(); break;
+            case CountdownState.Running:
+                audio.Stop();
+                countdown.Pause();
+                break;
+            case CountdownState.Paused: countdown.Resume(); break;
         }
     }
-    /// <summary>
-    /// 音声デバイス番号を取得する
-    /// </summary>
-    /// <returns></returns>
-    private int GetDeviceNumber()
-    {
-        if (checkedDeviceIndex == -1) { return -1; }
 
-        var devices = AudioPlayer.GetDevices();
-        for (int i = 0; i < devices.Count; i++)
+    /// <summary>停止中なら開始、それ以外ならリセットする（一時停止機能なし）。</summary>
+    private void ToggleStartReset()
+    {
+        if (countdown.State == CountdownState.Idle)
+            StartCountdown();
+        else
+            ResetCountdown();
+    }
+
+    private void ResetCountdown()
+    {
+        rapidClickCount = 0;
+        resetArmTimer.Stop();
+        audio.Stop();
+        countdown.Reset();
+        SetIcon(IconFor(countdown.State));
+    }
+
+    /// <summary>
+    /// 状態に合わせて、タイマー・アイコン・メニュー・入力欄をまとめて更新する。
+    /// </summary>
+    private void ApplyState(CountdownState state)
+    {
+        bool idle = state == CountdownState.Idle;
+
+        // 音声は止めない（残り 1 秒の読み上げ直後に終了しても最後まで再生する）
+        timer1.Enabled = state == CountdownState.Running;
+
+        panel1.Enabled = idle;
+        selectToolStripMenuItem.Enabled = idle;
+        stopToolStripMenuItem.Enabled = !idle;
+
+        if (PauseEnabled)
         {
-            if (devices[i] == toolStripStatusLabel1.Text)
+            startToolStripMenuItem.Enabled = true;
+            startToolStripMenuItem.Text = state switch
             {
-                return i;
-            }
+                CountdownState.Running => "一時停止(&S)",
+                CountdownState.Paused => "再開(&S)",
+                _ => "開始(&S)",
+            };
         }
-        toolStripStatusLabel1.Text = "既定のデバイス";
-        checkedDeviceIndex = -1;
-        return -1;
-    }
-
-    /// <summary>
-    /// 出力デバイス名の ToolStripMenuItem がクリックされたときに実行されるイベントハンドラ
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private void ToolStripMenuItem_Click(object? sender, EventArgs e)
-    {
-        // クリックされたアイテムを取得する
-        ToolStripMenuItem? clickedItem = (ToolStripMenuItem?)sender;
-        if (clickedItem is null) { return; }
-        // すべてのアイテムからチェックを外す
-        foreach (ToolStripMenuItem item in toolStripDropDownButton1.DropDownItems)
-        { item.Checked = false; }
-        // クリックされたアイテムにチェックをつける
-        clickedItem.Checked = true;
-        // チェックされたアイテムのインデックスを取得する
-        checkedDeviceIndex = toolStripDropDownButton1.DropDownItems.IndexOf(clickedItem);
-        // チェックされたアイテムの名前をラベルに表示する
-        toolStripStatusLabel1.Text = toolStripDropDownButton1.DropDownItems[checkedDeviceIndex].ToString();
-    }
-
-    /// <summary>
-    /// サイズ変更で時間表示の文字サイズを変更するイベントハンドラ
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private void SplitContainer1_Panel2_SizeChanged(object sender, EventArgs e) => ControlSizeChange((SplitterPanel)sender, label2);
-    /// <summary>
-    /// labelのレイアウト変更で時間表示の文字サイズを変更するイベントハンドラ
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private void Label2_Layout(object sender, LayoutEventArgs e) => ControlSizeChange(splitContainer1.Panel2, (Label)sender);
-    /// <summary>
-    /// labelのコントロールサイズを基にしてフォントサイズを自動調節する
-    /// </summary>
-    /// <param name="controlP">親コントロール</param>
-    /// <param name="controlC">子コントロール</param>
-    private void ControlSizeChange(Control controlP, Control controlC)
-    {
-        // コントロールが初期化済みなら
-        if (!initialized) { return; }
-        // コントロールの中心座標
-        Point p = GetControlLocation(controlP, controlC);
-        bool flag = p.X > 0 && p.Y > 0;
-        while (true)
+        else
         {
-            if (p.X < 0 || p.Y < 0)
-            {
-                if (controlC.Font.Size <= 1)
-                {
-                    break;
-                }
-                // 文字を小さくする
-                p = ResizeFont(controlP, controlC, -1f);
-                if (flag)
-                {
-                    break;
-                }
-            }
-            else
-            {
-                // 文字を大きくする
-                p = ResizeFont(controlP, controlC, 1f);
-                if (!flag)
-                {
-                    // 文字を小さくする
-                    p = ResizeFont(controlP, controlC, -1f);
-                    break;
-                }
-            }
+            startToolStripMenuItem.Enabled = idle;
+            startToolStripMenuItem.Text = "開始(&S)";
         }
-        controlC.Location = p + new Size(Margin.Left, Margin.Top);
-    }
-    private Point ResizeFont(Control controlP, Control controlC, float emSize)
-    {
-        controlC.Font = new Font(controlC.Font.FontFamily, (float)(controlC.Font.Size + emSize), controlC.Font.Style);
-        return GetControlLocation(controlP, controlC);
-    }
-    private Point GetControlLocation(Control controlP, Control controlC)
-    {
-        Size s = controlP.ClientSize - controlC.ClientSize;
-        return new Point(
-            (s.Width - Margin.Left - Margin.Right) / 2,
-            (s.Height - Margin.Top - Margin.Bottom) / 2);
+
+        // リセット待ち（Stop アイコン表示中）はアイコンを変えない
+        if (!resetArmTimer.Enabled)
+            SetIcon(IconFor(state));
     }
 
-    /// <summary>
-    /// カウントダウンを開始するイベントハンドラ
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
+    private ButtonIcon IconFor(CountdownState state) => state switch
+    {
+        CountdownState.Running => PauseEnabled ? ButtonIcon.Pause : ButtonIcon.Stop,
+        _ => ButtonIcon.Play,
+    };
+
+    // -----------------------------
+    // ボタン・メニュー
+    // -----------------------------
+
     private void Button1_Click(object sender, EventArgs e)
     {
-        if (selectToolStripMenuItem.Checked)
+        if (!PauseEnabled)
         {
-            ButtonWithPause_Click();
+            ToggleStartReset();
+            return;
         }
-        else
+
+        // メニューからの操作は連続クリック判定の対象にしない
+        if (sender != button1)
         {
-            ButtonWithoutPause_Click();
+            TogglePause();
+            return;
+        }
+
+        long now = Environment.TickCount64;
+        rapidClickCount = now - lastClickTime <= SystemInformation.DoubleClickTime ? rapidClickCount + 1 : 1;
+        lastClickTime = now;
+
+        // 3 回目の連続クリックでリセット
+        if (rapidClickCount >= 3)
+        {
+            ResetCountdown();
+            return;
+        }
+
+        TogglePause();
+
+        // 2 回目の連続クリックで、しばらく Stop アイコンを表示してリセットを待ち受ける
+        if (rapidClickCount == 2)
+        {
+            SetIcon(ButtonIcon.Stop);
+            resetArmTimer.Stop();
+            resetArmTimer.Start();
         }
     }
 
-    /// <summary>
-    /// カウントダウンをリセットするイベントハンドラ
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private void Reset_Click(object? sender = null, EventArgs? e = null)
+    private void ResetArmTimer_Tick(object? sender, EventArgs e)
     {
-        if (selectToolStripMenuItem.Checked)
-        {
-            clickCount = 2;
-            ButtonWithPause_Click();
-        }
-        else
-        {
-            ButtonWithoutPause_Click();
-        }
+        resetArmTimer.Stop();
+        rapidClickCount = 0;
+        SetIcon(IconFor(countdown.State));
     }
 
-    /// <summary>
-    /// タイマーの開始，リセットを変更する実処理（一時停止機能あり）
-    /// </summary>
-    private void ButtonWithPause_Click()
-    {
-        // クリック数カウント
-        clickCount++;
-        if (clickCount == 1)
-        {
-            clickInterval = 0;
-            System.Windows.Forms.Timer t = new()
-            {
-                Interval = SystemInformation.DoubleClickTime
-            };
-            t.Start();
-            t.Tick += (s, args) =>
-            {
-                if (clickCount != 2)
-                {
-                    clickCount = 0;
-                }
-                t.Stop();
-            };
-        }
-        // ダブルクリックだったらトリプルクリックの計測開始
-        else if (clickCount == 2)
-        {
-            System.Windows.Forms.Timer t = new()
-            {
-                Interval = 100
-            };
-            t.Start();
-            t.Tick += (s, args) =>
-            {
-                // 時間計測
-                clickInterval += t.Interval;
-                // ダブルクリック間隔の時間を超えたらリセット
-                if (SystemInformation.DoubleClickTime < clickInterval)
-                {
-                    t.Stop();
-                    clickInterval = 0;
-                    clickCount = 0;
-                    if (timer1.Enabled)
-                    {
-                        // タイマーが開始していたら一時停止ボタンにする
-                        stream1 = GetType().Assembly.GetManifestResourceStream("VoiceCountdown.Resources.Pause.svg");
-                        button1.BackgroundImage = Svg.GetImage(button1.Size, stream1);
-                    }
-                    else
-                    {
-                        // タイマーが停止していたら開始ボタンにする
-                        stream1 = GetType().Assembly.GetManifestResourceStream("VoiceCountdown.Resources.Play.svg");
-                        button1.BackgroundImage = Svg.GetImage(button1.Size, stream1);
-                    }
-                }
-            };
-        }
-        // ダブルクリック間隔の時間を超えるまで処理
-        if (clickInterval < SystemInformation.DoubleClickTime)
-        {
-            if (clickCount == 3)
-            {
-                clickCount = 0;
-                // トリプルクリックされたときの処理を記述
-                stream1 = GetType().Assembly.GetManifestResourceStream("VoiceCountdown.Resources.Play.svg");
-                button1.BackgroundImage = Svg.GetImage(button1.Size, stream1);
-                // オーディオを停止する
-                audioPlayer?.Stop();
-                // タイマーを停止する
-                timer1.Stop();
-                // ストップウォッチをリセットする
-                sw.Reset();
-                label2.Text = "00:00";
-                panel1.Enabled = true;
-                stopToolStripMenuItem.Enabled = false;
-                startToolStripMenuItem.Text = "開始";
-                selectToolStripMenuItem.Enabled = true;
-            }
-            else
-            {
-                if (timer1.Enabled)
-                {
-                    // オーディオを停止する
-                    audioPlayer?.Stop();
-                    // タイマーを停止する
-                    timer1.Stop();
-                    // ストップウォッチを止める
-                    sw.Stop();
-                    stream1 = GetType().Assembly.GetManifestResourceStream("VoiceCountdown.Resources.Play.svg");
-                    button1.BackgroundImage = Svg.GetImage(button1.Size, stream1);
-                    startToolStripMenuItem.Enabled = true;
-                    startToolStripMenuItem.Text = "再開";
-                }
-                else
-                {
-                    current = 0;
-                    timeSpan = dateTimePicker1.Value - baseDate;
-                    // 時刻で指定
-                    if (radioButtonAlarm.Checked)
-                    {
-                        timeSpan -= DateTime.Now - DateTime.Today;
-                        timeSpan = new TimeSpan(timeSpan.Hours, timeSpan.Minutes, timeSpan.Seconds);
-                        timeSpan = timeSpan > TimeSpan.Zero ? timeSpan : timeSpan + TimeSpan.FromDays(1);
-                    }
-                    // タイマーを開始する
-                    timer1.Start();
-                    // ストップウォッチを開始する
-                    sw.Start();
-                    stream1 = GetType().Assembly.GetManifestResourceStream("VoiceCountdown.Resources.Pause.svg");
-                    button1.BackgroundImage = Svg.GetImage(button1.Size, stream1);
-                    panel1.Enabled = false;
-                    stopToolStripMenuItem.Enabled = true;
-                    startToolStripMenuItem.Text = "一時停止";
-                    selectToolStripMenuItem.Enabled = false;
-                }
-                if (clickCount == 2)
-                {
-                    stream1 = GetType().Assembly.GetManifestResourceStream("VoiceCountdown.Resources.Stop.svg");
-                    button1.BackgroundImage = Svg.GetImage(button1.Size, stream1);
-                }
-            }
-        }
-    }
-    /// <summary>
-    /// タイマーの開始，リセットを変更する実処理（一時停止機能なし）
-    /// </summary>
-    private void ButtonWithoutPause_Click()
-    {
-        if (timer1.Enabled)
-        {
-            stream1 = GetType().Assembly.GetManifestResourceStream("VoiceCountdown.Resources.Play.svg");
-            button1.BackgroundImage = Svg.GetImage(button1.Size, stream1);
-            // オーディオを停止する
-            audioPlayer?.Stop();
-            // タイマーを停止する
-            timer1.Stop();
-            // ストップウォッチをリセットする
-            sw.Reset();
-            label2.Text = "00:00";
-            panel1.Enabled = true;
-            startToolStripMenuItem.Enabled = true;
-            stopToolStripMenuItem.Enabled = false;
-            selectToolStripMenuItem.Enabled = true;
-        }
-        else
-        {
-            current = 0;
-            timeSpan = dateTimePicker1.Value - baseDate;
-            // 時刻で指定
-            if (radioButtonAlarm.Checked)
-            {
-                timeSpan -= DateTime.Now - DateTime.Today;
-                timeSpan = new TimeSpan(timeSpan.Hours, timeSpan.Minutes, timeSpan.Seconds);
-                timeSpan = timeSpan > TimeSpan.Zero ? timeSpan : timeSpan + TimeSpan.FromDays(1);
-            }
-            // タイマーを開始する
-            timer1.Start();
-            // ストップウォッチを開始する
-            sw.Start();
-            stream1 = GetType().Assembly.GetManifestResourceStream("VoiceCountdown.Resources.Stop.svg");
-            button1.BackgroundImage = Svg.GetImage(button1.Size, stream1);
-            panel1.Enabled = false;
-            startToolStripMenuItem.Enabled = false;
-            stopToolStripMenuItem.Enabled = true;
-            selectToolStripMenuItem.Enabled = false;
-        }
-    }
+    private void Reset_Click(object? sender, EventArgs e) => ResetCountdown();
 
-    /// <summary>
-    /// 出力デバイスを選択するイベントハンドラ
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private void ToolStripDropDownButton1_Click(object? sender = null, EventArgs? e = null)
-    {
-        bool b = true;
-        var devices = AudioPlayer.GetDevices();
-        if (devices.Count == toolStripDropDownButton1.DropDownItems.Count)
-        {
-            foreach (ToolStripMenuItem item in toolStripDropDownButton1.DropDownItems)
-            {
-                var txt = item.Text is null ? "" : item.Text;
-                b = b && devices.Contains(txt);
-            }
-        }
-        else
-        {
-            b = false;
-        }
-        if (!b)
-        {
-            checkedDeviceIndex = -1;
-            toolStripDropDownButton1.DropDownItems.Clear();
-            for (int i = 0; i < devices.Count; i++)
-            {
-                // ドロップダウンリストに表示するアイテムを作成する
-                ToolStripMenuItem item = new(devices[i]);
-                // アイテムがクリックされたときのイベントハンドラを設定する
-                item.Click += new EventHandler(ToolStripMenuItem_Click);
-                toolStripDropDownButton1.DropDownItems.Add(item);
-                if (devices[i] == toolStripStatusLabel1.Text)
-                {
-                    checkedDeviceIndex = i;
-                    item.Checked = true;
-                }
-            }
-            if (checkedDeviceIndex == -1)
-            {
-                toolStripStatusLabel1.Text = "既定のデバイス";
-            }
-        }
-    }
+    private void Timer1_Tick(object sender, EventArgs e) => countdown.Tick();
 
-    /// <summary>
-    /// 一時停止機能を使用するかを選択するイベントハンドラ
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
     private void SelectToolStripMenuItem_Click(object sender, EventArgs e)
     {
         selectToolStripMenuItem.Checked = !selectToolStripMenuItem.Checked;
+        ApplyState(countdown.State);
     }
 
-    /// <summary>
-    /// フォントダイアログを表示するイベントハンドラ
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
     private void FontToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (fontDialog1.ShowDialog() == DialogResult.OK)
-        {
-            label2.Font = new Font(fontDialog1.Font.FontFamily, label2.Font.Size);
-            ControlSizeChange(splitContainer1.Panel2, label2);
-        }
+        if (fontDialog1.ShowDialog() != DialogResult.OK) return;
+
+        SetTimeFont(new Font(fontDialog1.Font.FontFamily, label2.Font.Size, fontDialog1.Font.Style));
+        FitTimeLabel();
     }
 
-    /// <summary>
-    /// 終了イベントハンドラ
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        audioPlayer?.Stop();
-        Close();
-    }
+    private void ExitToolStripMenuItem_Click(object sender, EventArgs e) => Close();
 
-    /// <summary>
-    /// バージョン情報を表示するイベントハンドラ
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
     private void AboutToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        string version = "Version 20250328";
+        string version = "Version 20261013";
         MessageBox.Show("Voice Countdown -" + Text + "-\r\n" + version
             + "\r\n\r\n\r\nクレジット情報：\r\nあみたろの声素材工房(https://amitaro.net/)の音声を使用しました", "Voice Countdown のバージョン情報");
     }
+
+    private void Form1_Load(object sender, EventArgs e) => SetIcon(currentIcon, force: true);
 
     private void Button1_MouseEnter(object sender, EventArgs e) => Cursor = Cursors.Hand;
 
     private void Button1_MouseLeave(object sender, EventArgs e) => Cursor = Cursors.Default;
 
-    private void Button1_Resize(object sender, EventArgs e)
+    // -----------------------------
+    // 音声・出力デバイス
+    // -----------------------------
+
+    private void PlaySound(string soundKey)
     {
-        button1.BackgroundImage = Svg.GetImage(button1.Size, stream1);
+        var stream = Resources.ResourceManager.GetStream(soundKey);
+        if (stream is null) return;
+
+        try
+        {
+            audio.Play(stream, GetDeviceNumber());
+        }
+        catch (Exception ex)
+        {
+            // 出力デバイスが外された場合など。カウントダウンは止めない
+            audio.Stop();
+            MessageBox.Show(ex.Message, "音声を再生できませんでした");
+        }
     }
 
-    private void Form1_Load(object sender, EventArgs e)
+    /// <summary>
+    /// 選択中のデバイス名から、現在のデバイス番号を求める。
+    /// デバイスが見つからなければ既定のデバイスに戻す。
+    /// </summary>
+    private int GetDeviceNumber()
     {
-        stream1 = GetType().Assembly.GetManifestResourceStream("VoiceCountdown.Resources.Play.svg");
-        button1.BackgroundImage = Svg.GetImage(button1.Size, stream1);
+        if (selectedDeviceName is null) return AudioPlayer.DefaultDevice;
+
+        var names = AudioPlayer.GetDeviceNames();
+        for (int i = 0; i < names.Count; i++)
+        {
+            if (names[i] == selectedDeviceName) return i;
+        }
+
+        SelectDevice(null);
+        return AudioPlayer.DefaultDevice;
+    }
+
+    /// <summary>デバイス一覧を作り直し、選択中のデバイスにチェックを付ける。</summary>
+    private void InitDeviceMenu()
+    {
+        var names = AudioPlayer.GetDeviceNames();
+
+        if (selectedDeviceName is not null && !names.Contains(selectedDeviceName))
+            selectedDeviceName = null;
+
+        var oldItems = toolStripDropDownButton1.DropDownItems.Cast<ToolStripItem>().ToArray();
+        toolStripDropDownButton1.DropDownItems.Clear();
+        foreach (var old in oldItems)
+            old.Dispose();
+
+        var defaultItem = new ToolStripMenuItem(DefaultDeviceLabel) { Checked = selectedDeviceName is null };
+        defaultItem.Click += (_, _) => SelectDevice(null);
+        toolStripDropDownButton1.DropDownItems.Add(defaultItem);
+        toolStripDropDownButton1.DropDownItems.Add(new ToolStripSeparator());
+
+        foreach (var name in names)
+        {
+            var item = new ToolStripMenuItem(name) { Checked = name == selectedDeviceName };
+            item.Click += (_, _) => SelectDevice(name);
+            toolStripDropDownButton1.DropDownItems.Add(item);
+        }
+
+        toolStripStatusLabel1.Text = selectedDeviceName ?? DefaultDeviceLabel;
+    }
+
+    private void SelectDevice(string? name)
+    {
+        selectedDeviceName = name;
+        toolStripStatusLabel1.Text = name ?? DefaultDeviceLabel;
+
+        foreach (ToolStripItem item in toolStripDropDownButton1.DropDownItems)
+        {
+            if (item is ToolStripMenuItem menuItem)
+                menuItem.Checked = menuItem.Text == toolStripStatusLabel1.Text;
+        }
+    }
+
+    private void ToolStripDropDownButton1_DropDownOpening(object? sender, EventArgs e) => InitDeviceMenu();
+
+    // -----------------------------
+    // ボタンのアイコン
+    // -----------------------------
+
+    private void SetIcon(ButtonIcon icon, bool force = false)
+    {
+        if (!force && icon == currentIcon && button1.BackgroundImage is not null) return;
+
+        currentIcon = icon;
+        RenderIcon();
+    }
+
+    private void RenderIcon()
+    {
+        var old = button1.BackgroundImage;
+        button1.BackgroundImage = SvgIcons.Render(currentIcon, button1.ClientSize);
+        old?.Dispose();
+    }
+
+    private void Button1_Resize(object sender, EventArgs e) => RenderIcon();
+
+    // -----------------------------
+    // 残り時間の表示（パネルいっぱいに収まるようフォントサイズを調整）
+    // -----------------------------
+
+    private void SetTimeText(string text)
+    {
+        if (label2.Text == text) return;
+
+        label2.Text = text;
+        // "09:59" → "1:00:00" のように文字数が変わったときだけ再計算する
+        if (text.Length != lastFittedText.Length)
+            FitTimeLabel();
+    }
+
+    private void SplitContainer1_Panel2_SizeChanged(object sender, EventArgs e) => FitTimeLabel();
+
+    private void FitTimeLabel()
+    {
+        var panel = splitContainer1.Panel2;
+        var area = new Size(
+            panel.ClientSize.Width - Margin.Horizontal,
+            panel.ClientSize.Height - Margin.Vertical);
+        if (area.Width <= 0 || area.Height <= 0) return;
+
+        // 大きめのフォントで一度だけ測り、比率からサイズを決める
+        const float probeSize = 100f;
+        var family = label2.Font.FontFamily;
+        var style = label2.Font.Style;
+        Size measured;
+        using (var probe = new Font(family, probeSize, style))
+            measured = TextRenderer.MeasureText(label2.Text, probe);
+
+        if (measured.Width > 0 && measured.Height > 0)
+        {
+            float scale = Math.Min((float)area.Width / measured.Width, (float)area.Height / measured.Height);
+            float emSize = Math.Max(1f, MathF.Floor(probeSize * scale));
+
+            if (Math.Abs(label2.Font.Size - emSize) >= 1f)
+                SetTimeFont(new Font(family, emSize, style));
+        }
+
+        label2.Location = new Point(
+            (panel.ClientSize.Width - label2.Width) / 2,
+            (panel.ClientSize.Height - label2.Height) / 2);
+
+        lastFittedText = label2.Text;
+    }
+
+    private void SetTimeFont(Font font)
+    {
+        var old = ownedTimeFont;
+        label2.Font = font;
+        ownedTimeFont = font;
+        old?.Dispose();
+    }
+
+    // -----------------------------
+    // 終了処理
+    // -----------------------------
+
+    private void DisposeResources()
+    {
+        timer1.Stop();
+        resetArmTimer.Dispose();
+        audio.Dispose();
+        button1.BackgroundImage?.Dispose();
+        button1.BackgroundImage = null;
     }
 }
