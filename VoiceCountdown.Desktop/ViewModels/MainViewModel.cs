@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Reflection;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shell;
@@ -252,6 +253,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         get => isSettingsPaneOpen;
         set => SetProperty(ref isSettingsPaneOpen, value);
     }
+
+    /// <summary>設定パネルに表示するバージョン（csproj の Version）。</summary>
+    public string VersionText { get; } = $"バージョン {GetAppVersion()}";
 
     public double? InitialWindowWidth { get; }
 
@@ -517,6 +521,19 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             WindowWidth = windowWidth,
             WindowHeight = windowHeight,
         });
+    }
+
+    /// <summary>
+    /// アプリのバージョン。InformationalVersion には "+コミットハッシュ" が付くことがあるので取り除く。
+    /// </summary>
+    private static string GetAppVersion()
+    {
+        var info = typeof(MainViewModel).Assembly
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+        if (string.IsNullOrEmpty(info)) return "不明";
+
+        int plus = info.IndexOf('+');
+        return plus >= 0 ? info[..plus] : info;
     }
 
     public void Dispose()

@@ -54,6 +54,21 @@ dotnet test VoiceCountdown.slnx
 | VoiceCountdown.Core | カウントダウンの計算、時間入力の解析、設定の保存 |
 | VoiceCountdown.Core.Tests | Core の単体テスト（xUnit） |
 
+### リリース手順
+
+バージョン番号は [セマンティック バージョニング](https://semver.org/lang/ja/)（例: `2.1.0`）で管理します。
+
+1. `VoiceCountdown.Desktop/VoiceCountdown.Desktop.csproj` の `<Version>` を新しい番号にする
+2. `CHANGELOG.md` の「未リリース」の内容を、新しい番号と日付の見出し（例: `## [2.1.0] - 2026-11-01`）の下に移す
+3. コミットして push し、同じ番号のタグを付けて push する
+
+    ```
+    git tag v2.1.0
+    git push origin v2.1.0
+    ```
+
+タグを push すると GitHub Actions がテスト・発行を行い、exe を zip にまとめて [Releases](https://github.com/tam18947/VoiceCountdown/releases) に公開します。タグと `<Version>` が一致しない場合や、`CHANGELOG.md` に該当する項目がない場合は、公開せずに止まります。
+
 ## クレジット
 
 あみたろの声素材工房 (<https://amitaro.net/>) の音声を使用しました。

@@ -133,6 +133,11 @@
                     <TextBlock Style="{StaticResource CaptionText}" Margin="0,20,0,0">
                         音声：<Hyperlink NavigateUri="https://amitaro.net/" RequestNavigate="Hyperlink_RequestNavigate">あみたろの声素材工房</Hyperlink>
                     </TextBlock>
+                    <TextBlock Style="{StaticResource CaptionText}" Margin="0,4,0,0">
+                        <Run Text="{Binding VersionText, Mode=OneWay}" />
+                        <Run Text="・" />
+                        <Hyperlink NavigateUri="https://github.com/tam18947/VoiceCountdown/releases" RequestNavigate="Hyperlink_RequestNavigate">更新を確認</Hyperlink>
+                    </TextBlock>
                 </StackPanel>
             </ScrollViewer>
         </Border>

@@ -9,6 +9,7 @@
     <AssemblyName>VoiceCountdown</AssemblyName>
     <RootNamespace>VoiceCountdown.Desktop</RootNamespace>
     <ApplicationIcon>favicon.ico</ApplicationIcon>
+    <!-- アプリのバージョン。リリース時はここを上げ、同じ番号のタグ（v2.0.0 など）を push する -->
     <Version>2.0.0</Version>
     <Product>カウントダウン読み上げちゃん</Product>
   </PropertyGroup>

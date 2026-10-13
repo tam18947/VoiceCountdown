@@ -1,0 +1,25 @@
+# push とプルリクエストのたびに、ビルドとテストを実行する
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+    tags-ignore: ["v*"]   # タグは release.yml で扱う
+  pull_request:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: ビルド
+        run: dotnet build VoiceCountdown.slnx -c Release
+
+      - name: テスト
+        run: dotnet test VoiceCountdown.slnx -c Release --no-build
