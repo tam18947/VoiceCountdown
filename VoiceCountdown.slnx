@@ -5,5 +5,5 @@
   </Folder>
   <Project Path="VoiceCountdown.Core.Tests/VoiceCountdown.Core.Tests.csproj" />
   <Project Path="VoiceCountdown.Core/VoiceCountdown.Core.csproj" />
-  <Project Path="VoiceCountdown/VoiceCountdown.csproj" />
+  <Project Path="VoiceCountdown.Desktop/VoiceCountdown.Desktop.csproj" />
 </Solution>

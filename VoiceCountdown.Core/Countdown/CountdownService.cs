@@ -34,6 +34,9 @@ public class CountdownService
 
     public CountdownState State { get; private set; } = CountdownState.Idle;
 
+    /// <summary>最後に <see cref="Start"/> した時間。</summary>
+    public TimeSpan Duration => duration;
+
     public TimeSpan Elapsed => State == CountdownState.Running
         ? elapsedBeforePause + timeProvider.GetElapsedTime(runningSince)
         : elapsedBeforePause;

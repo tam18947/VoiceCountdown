@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>VoiceCountdown</AssemblyName>
+    <RootNamespace>VoiceCountdown.Desktop</RootNamespace>
+    <ApplicationIcon>favicon.ico</ApplicationIcon>
+    <Version>2.0.0</Version>
+    <Product>カウントダウン読み上げちゃん</Product>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NAudio.WinMM" Version="2.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\VoiceCountdown.Core\VoiceCountdown.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- 読み上げ音声（あみたろの声素材工房 https://amitaro.net/） -->
+    <EmbeddedResource Include="Sounds\*.wav" LogicalName="Sounds.%(Filename)%(Extension)" />
+    <Resource Include="favicon.ico" />
+  </ItemGroup>
+
+</Project>
