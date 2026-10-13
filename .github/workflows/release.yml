@@ -1,0 +1,79 @@
+# v2.0.0 のようなタグを push すると、テスト → 発行 → GitHub Releases への公開までを行う
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write   # Releases を作るために必要
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: タグと csproj のバージョンが一致するか確認
+        id: version
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart('v')
+          [xml]$proj = Get-Content VoiceCountdown.Desktop/VoiceCountdown.Desktop.csproj -Encoding utf8
+          $projVersion = $proj.Project.PropertyGroup | ForEach-Object { $_.Version } | Where-Object { $_ } | Select-Object -First 1
+          if ($projVersion -ne $version) {
+            Write-Error "タグ ($version) と csproj の <Version> ($projVersion) が一致しません。"
+            exit 1
+          }
+          "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: CHANGELOG.md からリリースノートを取り出す
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          $text = Get-Content CHANGELOG.md -Raw -Encoding utf8
+          $pattern = '(?ms)^## \[' + [regex]::Escape($env:VERSION) + '\][^\n]*\n(.*?)(?=^## |^\[|\z)'
+          $match = [regex]::Match($text, $pattern)
+          if (-not $match.Success -or [string]::IsNullOrWhiteSpace($match.Groups[1].Value)) {
+            Write-Error "CHANGELOG.md に「## [$env:VERSION]」の項目がないか、中身が空です。"
+            exit 1
+          }
+          $match.Groups[1].Value.Trim() | Out-File release-notes.md -Encoding utf8
+
+      - name: テスト
+        run: dotnet test VoiceCountdown.slnx -c Release
+
+      - name: 発行（exe 1 ファイル、.NET 10 デスクトップランタイムが必要）
+        run: >
+          dotnet publish VoiceCountdown.Desktop/VoiceCountdown.Desktop.csproj
+          -c Release
+          -r win-x64
+          --self-contained false
+          -p:PublishSingleFile=true
+          -p:DebugType=None
+          -o publish
+
+      - name: zip にまとめる
+        id: package
+        run: |
+          Copy-Item LICENSE, README.md, CHANGELOG.md publish/
+          $zip = "VoiceCountdown-${{ steps.version.outputs.version }}-win-x64.zip"
+          Compress-Archive -Path publish/* -DestinationPath $zip
+          "zip=$zip" >> $env:GITHUB_OUTPUT
+
+      - name: GitHub Releases に公開
+        uses: softprops/action-gh-release@v2
+        with:
+          name: v${{ steps.version.outputs.version }}
+          body_path: release-notes.md
+          files: ${{ steps.package.outputs.zip }}
+          # v2.1.0-beta.1 のように「-」を含むタグはプレリリースにする
+          prerelease: ${{ contains(github.ref_name, '-') }}
