@@ -2,6 +2,7 @@
   <Folder Name="/ソリューション項目/">
     <File Path=".github/workflows/ci.yml" />
     <File Path=".github/workflows/release.yml" />
+    <File Path="CHANGELOG.md" />
     <File Path="image.png" />
     <File Path="README.md" />
   </Folder>
